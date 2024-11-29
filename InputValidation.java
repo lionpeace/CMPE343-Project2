@@ -3,11 +3,38 @@ import java.util.regex.Pattern;
 
 // For Date Validation
 import java.time.LocalDate;
+import java.sql.Date;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
+import java.util.Scanner;
 
 public class InputValidation {
+
+    public boolean defaultInputValidation(String input)
+    {
+        // String input for default validation structure
+        // For username and password input
+
+        if(input == null || input.trim().isEmpty())
+        {
+            System.out.println("\nInput cannot be null or empty!\n");
+            return false;
+        }
+
+        if(input.contains(" ") || input.contains("\t"))
+        {
+            System.out.println("\nInput cannot contain spaces!\n");
+            return false;
+        }
+
+        if(input.length() > 150)
+        {
+            System.out.println("\nInput cannot exceed 150 characters!\n");
+            return false;
+        }
+
+        return true;
+    }
 
     public boolean integerValidation(String input)
     {
@@ -25,13 +52,13 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Input cannot be null or empty!");
+            System.out.println("\nInput cannot be null or empty!\n");
             return false;
         }
 
         if(input.contains(" ") || input.contains("\t"))
         {
-            System.out.println("Input cannot contain spaces!");
+            System.out.println("\nInput cannot contain spaces!\n");
             return false;
         }
 
@@ -40,7 +67,47 @@ public class InputValidation {
             return true;
         }
 
+        else if(!input.matches("-?\\d+"))
+        {
+            System.out.println("\nPlease enter an integer value!\n");
+            return false;
+        }
+
         return true; // dummy
+    }
+
+    public boolean charValidation(String input)
+    {
+        // String input for return main menu
+        // Just for Return Main Menu
+
+        if(input == null || input.trim().isEmpty())
+        {
+            System.out.println("\nInput cannot be null or empty!\n");
+            return false;
+        }
+
+        if(input.contains(" ") || input.contains("\t"))
+        {
+            System.out.println("\nInput cannot contain spaces!\n");
+            return false;
+        }
+
+        if(input.length() > 1)
+        {
+            System.out.println("\nPlease enter just one letter!\n");
+            return false;
+        }
+
+        char character = input.charAt(0);
+
+        if(!Character.isLetter(character))
+        {
+            System.out.println("\nPlease enter a valid letter!\n");
+            return false;
+        }
+
+        return true;
     }
 
     public boolean noNumberValidation(String input)
@@ -52,13 +119,13 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Input cannot be null or empty!");
+            System.out.println("\nInput cannot be null or empty!\n");
             return false;
         }
 
         if(input.matches(".*[0-9].*"))
         {
-            System.out.println("Input cannot contain numbers!");
+            System.out.println("\nInput cannot contain numbers!\n");
             return false;
         }
 
@@ -77,7 +144,7 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Phone number cannot be null or empty!");
+            System.out.println("\nPhone number cannot be null or empty!\n");
             return false;
         }
 
@@ -88,8 +155,6 @@ public class InputValidation {
 
         return false;
     }
-
-
 
     public boolean passwordValidation(String input)
     {
@@ -106,34 +171,34 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Password cannot be null or empty!");
+            System.out.println("\nPassword cannot be null or empty!\n");
             return false;
         }
 
         if(input.contains(" ") || input.contains("\t"))
         {
-            System.out.println("Password cannot contain spaces!");
+            System.out.println("\nPassword cannot contain spaces!\n");
             return false;
         }
 
         if(input.length() < 8 || input.length() > 50)
         {
-            System.out.println("Password should be between 8 and 50 characters!");
+            System.out.println("\nPassword should be between 8 and 50 characters!\n");
             return false;
         }
 
         if (!Pattern.compile("[A-Z]").matcher(input).find()) {
-            System.out.println("Password must contain at least one uppercase letter!");
+            System.out.println("\nPassword must contain at least one uppercase letter!\n");
             return false;
         }
 
         if (!Pattern.compile("[a-z]").matcher(input).find()) {
-            System.out.println("Password must contain at least one lowercase letter!");
+            System.out.println("\nPassword must contain at least one lowercase letter!\n");
             return false;
         }
 
         if (!Pattern.compile("[^a-zA-Z0-9]").matcher(input).find()) {
-            System.out.println("Password must contain at least one special letter!");
+            System.out.println("\nPassword must contain at least one special letter!\n");
             return false;
         }
 
@@ -152,35 +217,35 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Email cannot be null or empty!");
+            System.out.println("\nEmail cannot be null or empty!\n");
             return false;
         }
 
         if(input.contains(" ") || input.contains("\t"))
         {
-            System.out.println("Email cannot contain spaces!");
+            System.out.println("\nEmail cannot contain spaces!\n");
             return false;
         }
 
         if(input.length() > 100)
         {
-            System.out.println("Email cannot contain at most 100 characters!");
+            System.out.println("\nEmail cannot contain at most 100 characters!\n");
             return false;
         }
 
         if(!input.endsWith(".com"))
         {
-            System.out.println("Invalid email format!");
+            System.out.println("\nInvalid email format!\n");
             return false;
         }
 
         if (!Pattern.compile(".+@.+\\.com$").matcher(input).matches()) {
-            System.out.println("Invalid email format!");
+            System.out.println("\nInvalid email format!\n");
             return false;
         }
 
         if (input.chars().filter(ch -> ch == '@').count() != 1) {
-            System.out.println("Invalid email format!");
+            System.out.println("\nInvalid email format!\n");
             return false;
         }
 
@@ -188,7 +253,7 @@ public class InputValidation {
 
         if (domainPart.isEmpty())
         {
-            System.out.println("Invalid email format!");
+            System.out.println("\nInvalid email format!\n");
             return false;
         }
 
@@ -204,13 +269,13 @@ public class InputValidation {
 
         if(input == null || input.trim().isEmpty())
         {
-            System.out.println("Date cannot be null or empty!");
+            System.out.println("\nDate cannot be null or empty!\n");
             return false;
         }
 
         if(input.contains(" ") || input.contains("\t"))
         {
-            System.out.println("Date cannot contain spaces!");
+            System.out.println("\nDate cannot contain spaces!\n");
             return false;
         }
 
@@ -222,7 +287,7 @@ public class InputValidation {
         }
         catch (DateTimeParseException e)
         {
-            System.out.println("Invalid date format!");
+            System.out.println("\nInvalid date format! Please use YYYY-MM-DD format.\n");
             return false;
         }
     }
