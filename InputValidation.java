@@ -129,6 +129,12 @@ public class InputValidation {
             return false;
         }
 
+        if (input.matches(".*[^a-zA-ZğüşıöçĞÜŞİÖÇ ].*"))
+        {
+            System.out.println("\nInput cannot contain special characters!\n");
+            return false;
+        }
+
         return true;
     }
 
@@ -153,7 +159,11 @@ public class InputValidation {
             return true;
         }
 
-        return false;
+        else
+        {
+            System.out.println("\nPlease enter a valid phone number!\n");
+            return false;
+        }
     }
 
     public boolean passwordValidation(String input)
@@ -239,6 +249,11 @@ public class InputValidation {
             return false;
         }
 
+        if (input.matches(".*[ğüşıöçĞÜŞİÖÇ].*")) {
+            System.out.println("\nEmail cannot contain Turkish characters!\n");
+            return false;
+        }
+
         if (!Pattern.compile(".+@.+\\.com$").matcher(input).matches()) {
             System.out.println("\nInvalid email format!\n");
             return false;
@@ -282,7 +297,20 @@ public class InputValidation {
         try
         {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(input, formatter);
+            LocalDate date = LocalDate.parse(input, formatter);
+
+            if (date.getMonthValue() == 2 && date.getDayOfMonth() > 29)
+            {
+                System.out.println("\nInvalid date! February cannot have more than 29 days.\n");
+                return false;
+            }
+
+            if (date.getMonthValue() == 2 && date.getDayOfMonth() == 29 && !date.isLeapYear())
+            {
+                System.out.println("\nInvalid date! February 29 is only valid in a leap year.\n");
+                return false;
+            }
+
             return true;
         }
         catch (DateTimeParseException e)

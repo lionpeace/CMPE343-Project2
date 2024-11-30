@@ -11,7 +11,7 @@ public class Authentication
 
         try (Connection conn = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD))
         {
-            String sql = "SELECT e.username, e.password, e.name, e.surname, e.phone_no, e.email, e.dateOfBirth, e.dateOfStart, r.role_name " +
+            String sql = "SELECT e.employee_id, e.username, e.password, e.name, e.surname, e.phone_no, e.email, e.dateOfBirth, e.dateOfStart, e.new_user , r.role_name " +
                     "FROM employees e " +
                     "JOIN roles r ON e.role = r.role_id " +
                     "WHERE e.username = ? AND e.password = ?";
@@ -25,6 +25,7 @@ public class Authentication
             {
                 username = rs.getString("username");
                 password = rs.getString("password");
+                int employee_id = rs.getInt("employee_id");
                 String role = rs.getString("role_name");
                 String name = rs.getString("name");
                 String surname = rs.getString("surname");
@@ -32,14 +33,15 @@ public class Authentication
                 String email = rs.getString("email");
                 Date dateOfBirth = rs.getDate("dateOfBirth");
                 Date dateOfStart = rs.getDate("dateOfStart");
+                Boolean newUser = rs.getBoolean("new_user");
 
                 if (Objects.equals(role, "Manager"))
                 {
-                    return new Manager(username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart);
+                    return new Manager(employee_id, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
                 }
                 else
                 {
-                    return new RegularEmployee(username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart);
+                    return new RegularEmployee(employee_id, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
                 }
             }
         }

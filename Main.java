@@ -77,7 +77,7 @@ public class Main {
      * If the user selects 'Y', the method calls the welcomeToApp() method to return to the main menu
      * and returns true. If the user selects 'N', the method returns false. For any other input,
      * an error message is displayed and the user is prompted again.
-     * @param input scanner variable from main to receive user input
+     * @param scanner scanner variable from main to receive user input
      * @return boolean value indicating whether the user wants to return to the main menu
      */
 
@@ -152,7 +152,6 @@ public class Main {
                     {
                         System.out.println("\nEmployee is not a Manager.\n");
                     }
-
                 }
                 else
                 {

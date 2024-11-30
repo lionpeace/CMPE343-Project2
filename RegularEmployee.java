@@ -1,15 +1,17 @@
 import java.util.Date;
+import java.util.Scanner;
 
 public class RegularEmployee extends Employee
 {
-    public RegularEmployee(String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart)
+    public RegularEmployee(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
     {
-        super(username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart);
+        super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
     }
 
-    public void updateProfile()
+    @Override
+    public void updateProfile(Scanner scanner)
     {
-        // Allow employees to update phone number, email, and password
+
     }
 
     public void regularEmployeeMenu(Employee employee)

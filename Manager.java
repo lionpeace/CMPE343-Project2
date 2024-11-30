@@ -3,22 +3,53 @@ import java.util.Scanner;
 
 public class Manager extends Employee
 {
-    public Manager(String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart)
+    public Manager(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
     {
-        super(username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart);
+        super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
     }
 
     @Override
-    public void updateProfile()
+    public void updateProfile(Scanner scanner) // Update MANAGER profile
     {
         Main.clearTheTerminal();
-        System.out.println("Update Profile");
+        InputValidation inputValidation = new InputValidation();
+
+        int presentEmployeeID = getEmployeeID();
+
+        do
+        {
+            System.out.println("Your Profile");
+            displayProfileFromDatabase(presentEmployeeID);
+            System.out.print("Which profile element do you want to update: ");
+            String choiceStr = scanner.nextLine();
+
+            if(inputValidation.integerValidation(choiceStr))
+            {
+                int choice = Integer.parseInt(choiceStr);
+
+                if(choice < 1 || choice > 11)
+                {
+                    System.out.println("\nInvalid choice!\n");
+                    continue;
+                }
+                if(choice == 1)
+                {
+                    System.out.println("\nYou cannot edit the employee ID!\n");
+                }
+                else if(choice == 11)
+                {
+                    break;
+                }
+                else
+                {
+                    updateEmployeeInfoFromChoice(choice, presentEmployeeID ,scanner);
+                }
+            }
+        } while(true);
     }
 
     public void displayAllEmployees()
     {
-        Main.clearTheTerminal();
-
         // Display all employees
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         final String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
@@ -57,14 +88,97 @@ public class Manager extends Employee
 
     }
 
-    public void updateEmployeeProfile()
+    public static boolean isEmployeeIdValid(int employeeID)
     {
-        Main.clearTheTerminal();
-        // Update non-profile fields (name, surname, etc.)
-        System.out.println("Update Employee Profile");
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String CHECK_QUERY = "SELECT role FROM employees WHERE employee_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement checkRoleStatement = connection.prepareStatement(CHECK_QUERY))
+        {
+
+            checkRoleStatement.setInt(1, employeeID);
+
+            try (ResultSet resultSet = checkRoleStatement.executeQuery())
+            {
+                if (resultSet.next())
+                {
+                    int role = resultSet.getInt("role");
+                    if (role == 1)
+                    {
+                        System.out.println("\nYou cannot update a manager!\n");
+                        return false;
+                    }
+                    return true;
+                }
+                else
+                {
+                    System.out.println("\nEmployee ID does not exist!\n");
+                    return false;
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    public void displayAllRoles()
+    public void updateEmployeeProfile(Scanner scanner)
+    {
+        InputValidation inputValidation = new InputValidation();
+        Main.clearTheTerminal();
+        // Update non-profile fields (name, surname, etc.)
+        do
+        {
+            displayAllEmployees();
+            System.out.print("Enter Employee ID that you want to update: ");
+            String employeeChoiceStr = scanner.nextLine();
+
+            if(inputValidation.integerValidation(employeeChoiceStr))
+            {
+                int employeeChoice = Integer.parseInt(employeeChoiceStr);
+
+                if(isEmployeeIdValid(employeeChoice))
+                {
+                    do
+                    {
+                        displayProfileFromDatabase(employeeChoice);
+                        System.out.print("Which profile element do you want to update: ");
+                        String choiceStr = scanner.nextLine();
+
+                        if(inputValidation.integerValidation(choiceStr))
+                        {
+                            int choice = Integer.parseInt(choiceStr);
+
+                            if(choice < 1 || choice > 11)
+                            {
+                                System.out.println("\nInvalid choice!\n");
+                                continue;
+                            }
+                            if(choice == 1)
+                            {
+                                System.out.println("\nYou cannot edit the employee ID!\n");
+                            }
+                            else if(choice == 11)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                updateEmployeeInfoFromChoice(choice, employeeChoice ,scanner);
+                            }
+                        }
+                    } while (true);
+
+                    break;
+                }
+            }
+        } while(true);
+    }
+
+    public static void displayAllRoles()
     {
         Main.clearTheTerminal();
 
@@ -150,6 +264,7 @@ public class Manager extends Employee
                     int rowsInserted = insertStatement.executeUpdate();
                     if (rowsInserted > 0)
                     {
+                        displayAllRoles();
                         System.out.println("\nNew role '" + newRoleName + "' added to the system successfully!\n");
                         break;
                     }
@@ -202,18 +317,18 @@ public class Manager extends Employee
                         int rowsAffected = deleteStatement.executeUpdate();
                         if (rowsAffected > 0)
                         {
-                            System.out.println("\nRole ID " + roleID + " deleted successfully!");
+                            System.out.println("\nRole ID " + roleID + " deleted successfully!\n");
                         }
                     }
                     else
                     {
-                        System.out.println("There is no such role ID in the system!");
+                        System.out.println("\nThere is no such role ID in the system!\n");
                     }
                 }
             }
             else
             {
-                System.out.println("Invalid role ID input!");
+                System.out.println("\nInvalid role ID input!\n");
             }
         }
         catch (SQLException sqlException)
@@ -454,15 +569,15 @@ public class Manager extends Employee
         do
         {
             System.out.println("1 - Update Your Profile");
-            System.out.println("2 - Display All Employees");
+            System.out.println("2 - Display All Employees"); // kk
             System.out.println("3 - Update Employee Non-Profile Fields");
-            System.out.println("4 - Display All Roles");
-            System.out.println("5 - Add a new Role");
-            System.out.println("6 - Delete a Role");
-            System.out.println("7 - Hire Employee");
-            System.out.println("8 - Fire Employee");
+            System.out.println("4 - Display All Roles"); // kk
+            System.out.println("5 - Add a new Role"); // kk
+            System.out.println("6 - Delete a Role"); // kk
+            System.out.println("7 - Hire Employee"); // kk
+            System.out.println("8 - Fire Employee"); // kk
             System.out.println("9 - Algorithms");
-            System.out.println("10 - Logout");
+            System.out.println("10 - Logout"); // kk
 
             System.out.print("\nEnter your choice: ");
             String managerMenuChoice = scanner.nextLine();
@@ -473,13 +588,14 @@ public class Manager extends Employee
 
                 switch (choice) {
                     case 1:
-                        updateProfile();
+                        updateProfile(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
                             break;
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 2:
@@ -490,16 +606,18 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 3:
-                        updateEmployeeProfile();
+                        updateEmployeeProfile(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
                             break;
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 4:
@@ -510,6 +628,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 5:
@@ -520,6 +639,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 6:
@@ -530,6 +650,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 7:
@@ -540,6 +661,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 8:
@@ -550,6 +672,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 9:
@@ -560,6 +683,7 @@ public class Manager extends Employee
                         }
                         else
                         {
+                            Main.clearTheTerminal();
                             continue;
                         }
                     case 10:
@@ -569,7 +693,6 @@ public class Manager extends Employee
                         System.out.println("\nInvalid choice!\n");
                         continue;
                 }
-
                 break;
             }
         } while (true);
