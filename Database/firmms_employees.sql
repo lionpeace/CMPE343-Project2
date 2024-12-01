@@ -33,10 +33,11 @@ CREATE TABLE `employees` (
   `dateofstart` date NOT NULL,
   `email` varchar(100) DEFAULT NULL,
   `role` int NOT NULL,
+  `new_user` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`employee_id`),
   KEY `role` (`role`),
   CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`role`) REFERENCES `roles` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +46,7 @@ CREATE TABLE `employees` (
 
 LOCK TABLES `employees` WRITE;
 /*!40000 ALTER TABLE `employees` DISABLE KEYS */;
-INSERT INTO `employees` VALUES (1,'bariscan','password123','Barış Can','Aslan','555-1234','1980-01-01','2020-01-01','jdoe@example.com',1),(2,'asmith','password123','Alice','Smith','555-5678','1985-02-02','2021-02-02','asmith@example.com',2),(3,'bwhite','password123','Bob','White','555-8765','1990-03-03','2022-03-03','bwhite@example.com',2),(4,'cjones','password123','Charlie','Jones','555-4321','1995-04-04','2023-04-04','cjones@example.com',3),(5,'dgreen','password123','David','Green','555-6789','1982-05-05','2020-05-05','dgreen@example.com',4),(6,'emartin','password123','Emma','Martin','555-9876','1987-06-06','2021-06-06','emartin@example.com',4),(7,'flee','password123','Frank','Lee','555-5432','1992-07-07','2022-07-07','flee@example.com',3),(8,'gking','password123','Grace','King','555-6543','1997-08-08','2023-08-08','gking@example.com',2),(9,'hyoung','password123','Henry','Young','555-7654','1984-09-09','2020-09-09','hyoung@example.com',1);
+INSERT INTO `employees` VALUES (1,'bariscan','khas1234','Barış Can','Aslan','555-1234','1980-01-01','2020-01-01','jdoe@example.com',1,0),(2,'alicesmith','khas1234','Alice','Smith','5364356754','1985-02-02','2021-02-02','alicesmith@gmail.com',9,1),(3,'bwhite','khas1234','Bob','White','555-8765','1990-03-03','2022-03-03','bwhite@example.com',2,1),(6,'emartin','khas1234','Emma','Martin','555-9876','1987-06-06','2021-06-06','emartin@example.com',4,1),(7,'flee','khas1234','Frank','Lee','555-5432','1992-07-07','2022-07-07','flee@example.com',3,1),(8,'gking','khas1234','Grace','King','555-6543','1997-08-08','2023-08-08','gking@example.com',2,1),(9,'henryoung','Khas.123','Henry Matheew','Younger','0538 359 9269','2003-03-02','2020-09-09','henryoung@gmail.com',1,0),(10,'yarenbulut','Kadirhas.123','Yaren','Bulut','537 456 75 34','2000-06-22','2024-11-30',NULL,2,0),(11,'zisantunceli','khas1234','Zişan','Tunçeli',NULL,'2003-03-03','2024-06-22',NULL,5,1);
 /*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-29  0:58:39
+-- Dump completed on 2024-12-01  3:25:11

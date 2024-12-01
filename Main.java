@@ -157,7 +157,7 @@ public class Main {
                 {
                     if(employee instanceof RegularEmployee regularEmployee)
                     {
-                        regularEmployee.regularEmployeeMenu(employee);
+                        regularEmployee.regularEmployeeMenu(employee, scanner);
                         break;
                     }
                     else

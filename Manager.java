@@ -3,15 +3,16 @@ import java.util.Scanner;
 
 public class Manager extends Employee
 {
+    // Constructor Method
     public Manager(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
     {
         super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
     }
 
+    // Update Your Profile Method
     @Override
     public void updateProfile(Scanner scanner) // Update MANAGER profile
     {
-        Main.clearTheTerminal();
         InputValidation inputValidation = new InputValidation();
 
         int presentEmployeeID = getEmployeeID();
@@ -48,6 +49,7 @@ public class Manager extends Employee
         } while(true);
     }
 
+    // Display All Employees Method
     public void displayAllEmployees()
     {
         // Display all employees
@@ -88,6 +90,7 @@ public class Manager extends Employee
 
     }
 
+    // Auxiliary Method for Update Employee Profile
     public static boolean isEmployeeIdValid(int employeeID)
     {
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -125,10 +128,10 @@ public class Manager extends Employee
         return false;
     }
 
+    // Update Employee Profile Method
     public void updateEmployeeProfile(Scanner scanner)
     {
         InputValidation inputValidation = new InputValidation();
-        Main.clearTheTerminal();
         // Update non-profile fields (name, surname, etc.)
         do
         {
@@ -178,10 +181,9 @@ public class Manager extends Employee
         } while(true);
     }
 
+    // Display All Roles Method
     public static void displayAllRoles()
     {
-        Main.clearTheTerminal();
-
         // Display all roles
         // Display all employees
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -220,9 +222,9 @@ public class Manager extends Employee
         }
     }
 
+    // Add New Role Method
     public void addNewRole(Scanner scanner)
     {
-        Main.clearTheTerminal();
         InputValidation inputValidation = new InputValidation();
 
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -281,6 +283,7 @@ public class Manager extends Employee
         }
     }
 
+    // Delete Role Method
     public void deleteRole(Scanner scanner)
     {
         displayAllRoles();
@@ -337,6 +340,7 @@ public class Manager extends Employee
         }
     }
 
+    // Auxiliary Method for Hire Employee
     public static boolean isRoleIdValid(int roleId)
     {
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -361,10 +365,9 @@ public class Manager extends Employee
         return false;
     }
 
+    // Hire Employee Method
     public void hireEmployee(Scanner scanner)
     {
-        Main.clearTheTerminal();
-
         InputValidation inputValidation = new InputValidation();
 
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
@@ -484,10 +487,9 @@ public class Manager extends Employee
         }
     }
 
+    // Fire Employee Method
     public void fireEmployee(Scanner scanner)
     {
-        Main.clearTheTerminal();
-
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         final String CHECK_QUERY1 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ?";
         final String CHECK_QUERY2 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ? AND role = 1";
@@ -550,6 +552,7 @@ public class Manager extends Employee
         }
     }
 
+    // Run Sorting Algorithm Method
     public void runSortingAlgorithms()
     {
         Main.clearTheTerminal();
@@ -557,6 +560,7 @@ public class Manager extends Employee
         System.out.println("Run Sorting Algorithms");
     }
 
+    // Manager Menu Method
     public void managerMenu(Employee employee, Scanner scanner)
     {
         InputValidation inputValidation = new InputValidation();
@@ -588,6 +592,7 @@ public class Manager extends Employee
 
                 switch (choice) {
                     case 1:
+                        Main.clearTheTerminal();
                         updateProfile(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -599,6 +604,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 2:
+                        Main.clearTheTerminal();
                         displayAllEmployees();
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -610,6 +616,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 3:
+                        Main.clearTheTerminal();
                         updateEmployeeProfile(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -621,6 +628,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 4:
+                        Main.clearTheTerminal();
                         displayAllRoles();
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -632,6 +640,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 5:
+                        Main.clearTheTerminal();
                         addNewRole(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -643,6 +652,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 6:
+                        Main.clearTheTerminal();
                         deleteRole(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -654,6 +664,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 7:
+                        Main.clearTheTerminal();
                         hireEmployee(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -665,6 +676,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 8:
+                        Main.clearTheTerminal();
                         fireEmployee(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -676,6 +688,7 @@ public class Manager extends Employee
                             continue;
                         }
                     case 9:
+                        Main.clearTheTerminal();
                         runSortingAlgorithms();
                         if(!Main.returnMainMenu(scanner))
                         {
