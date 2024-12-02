@@ -1,12 +1,15 @@
 import java.sql.*;
 import java.util.Scanner;
+import java.util.List;
 
 public class Manager extends Employee
 {
+    private static Database database;
     // Constructor Method
     public Manager(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
     {
         super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
+        database = new Database(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
     }
 
     // Update Your Profile Method
@@ -20,7 +23,7 @@ public class Manager extends Employee
         do
         {
             System.out.println("Your Profile");
-            displayProfileFromDatabase(presentEmployeeID);
+            database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
             System.out.print("Which profile element do you want to update: ");
             String choiceStr = scanner.nextLine();
 
@@ -41,20 +44,17 @@ public class Manager extends Employee
                 {
                     break;
                 }
-                else
-                {
-                    updateEmployeeInfoFromChoice(choice, presentEmployeeID ,scanner);
-                }
             }
         } while(true);
     }
 
+    /*
     // Display All Employees Method
     public void displayAllEmployees()
     {
         // Display all employees
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
+        String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
 
         try {
             Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
@@ -87,43 +87,38 @@ public class Manager extends Employee
         {
             sqlException.printStackTrace();
         }
+    }
+    */
 
+    public void displayAllEmployees()
+    {
+        // Display all employees
+        String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
+
+        List<String[]> employees = database.executeSelectQuery(SELECT_QUERY);
+
+        System.out.print("List of Employees\n\n");
+        // display the names of the columns in the ResultSet
+        System.out.print("Employee ID\tUsername\tName\tSurname\tPhone Number\tDate of Birth\tDate of Start\tE-mail\tRole\n\n");
+
+        for(String[] employee : employees)
+        {
+            for(String emp : employee)
+            {
+                System.out.printf("%-8s\t", emp);
+            }
+            System.out.println();
+        }
     }
 
     // Auxiliary Method for Update Employee Profile
     public static boolean isEmployeeIdValid(int employeeID)
     {
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String CHECK_QUERY = "SELECT role FROM employees WHERE employee_id = ?";
+        String CHECK_QUERY = "SELECT role FROM employees WHERE employee_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement checkRoleStatement = connection.prepareStatement(CHECK_QUERY))
+        if(database.checkQueryForEmployeeID(CHECK_QUERY, employeeID))
         {
-
-            checkRoleStatement.setInt(1, employeeID);
-
-            try (ResultSet resultSet = checkRoleStatement.executeQuery())
-            {
-                if (resultSet.next())
-                {
-                    int role = resultSet.getInt("role");
-                    if (role == 1)
-                    {
-                        System.out.println("\nYou cannot update a manager!\n");
-                        return false;
-                    }
-                    return true;
-                }
-                else
-                {
-                    System.out.println("\nEmployee ID does not exist!\n");
-                    return false;
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
+            return true;
         }
         return false;
     }
@@ -147,7 +142,7 @@ public class Manager extends Employee
                 {
                     do
                     {
-                        displayProfileFromDatabase(employeeChoice);
+                        database.displayProfileFromDatabase(employeeChoice, getEmployeeID());
                         System.out.print("Which profile element do you want to update: ");
                         String choiceStr = scanner.nextLine();
 
@@ -170,7 +165,7 @@ public class Manager extends Employee
                             }
                             else
                             {
-                                updateEmployeeInfoFromChoice(choice, employeeChoice ,scanner);
+                                database.updateEmployeeInfo(choice, employeeChoice ,scanner);
                             }
                         }
                     } while (true);
@@ -186,39 +181,22 @@ public class Manager extends Employee
     {
         // Display all roles
         // Display all employees
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String SELECT_QUERY = "SELECT * FROM firmms.roles";
+        String SELECT_QUERY = "SELECT * FROM firmms.roles";
+        List<String[]> roles = database.executeSelectQuery(SELECT_QUERY);
 
-        try {
-            Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(SELECT_QUERY);
+        System.out.print("List of Roles\n\n");
 
-            // get ResultSet's meta data
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int numberOfColumns = metaData.getColumnCount();
+        // display the names of the columns in the ResultSet
 
-            System.out.print("List of Roles\n\n");
+        System.out.print("Role ID\tRole Name\n\n");
 
-            // display the names of the columns in the ResultSet
-
-            System.out.print("Role ID\tRole Name\n\n");
-
-            // display query results
-            while (resultSet.next())
-            {
-                for (int i = 1; i <= numberOfColumns; i++)
-                {
-                    System.out.printf("%-8s\t", resultSet.getObject(i));
-                }
-                System.out.println();
-            }
-
-            connection.close();
-        }
-        catch (SQLException sqlException)
+        for(String[] role : roles)
         {
-            sqlException.printStackTrace();
+            for(String r: role)
+            {
+                System.out.printf("%-8s\t", r);
+            }
+            System.out.println();
         }
     }
 
@@ -227,59 +205,31 @@ public class Manager extends Employee
     {
         InputValidation inputValidation = new InputValidation();
 
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_name = ?";
-        final String INSERT_QUERY = "INSERT INTO firmms.roles (role_name) VALUES (?)";
-
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement checkStatement = connection.prepareStatement(CHECK_QUERY);
-             PreparedStatement insertStatement = connection.prepareStatement(INSERT_QUERY))
+        while (true)
         {
-            while (true)
+            System.out.print("Enter the new role name: ");
+            String newRoleName = scanner.nextLine();
+
+            // Validate role name
+            if (inputValidation.noNumberValidation(newRoleName))
             {
-                System.out.print("Enter the new role name: ");
-                String newRoleName = scanner.nextLine();
-
-                // Validate role name
-                if (inputValidation.noNumberValidation(newRoleName))
+                if (newRoleName.length() > 150)
                 {
-                    if (newRoleName.length() > 150)
-                    {
-                        System.out.println("Role name cannot be longer than 150 characters!");
-                        continue;
-                    }
+                    System.out.println("Role name cannot be longer than 150 characters!");
+                    continue;
+                }
 
-                    // Check if role name already exists
-                    checkStatement.setString(1, newRoleName);
-                    try (ResultSet checkResultSet = checkStatement.executeQuery())
-                    {
-                        if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
-                        {
-                            System.out.println("Role name already exists! Please enter a different role name.");
-                            continue;
-                        }
-                    }
-
-                    // Insert new role
-                    insertStatement.setString(1, newRoleName);
-
-                    int rowsInserted = insertStatement.executeUpdate();
-                    if (rowsInserted > 0)
-                    {
-                        displayAllRoles();
-                        System.out.println("\nNew role '" + newRoleName + "' added to the system successfully!\n");
-                        break;
-                    }
-                    else
-                    {
-                        System.out.println("Failed to add the new role. Please try again.");
-                    }
+                if (database.insertQueryForRoleName(newRoleName))
+                {
+                    displayAllRoles();
+                    System.out.println("\nNew role '" + newRoleName + "' added to the system successfully!\n");
+                    break;
+                }
+                else
+                {
+                    System.out.println("Failed to add the new role. Please try again.");
                 }
             }
-        }
-        catch (SQLException sqlException)
-        {
-            sqlException.printStackTrace();
         }
     }
 
@@ -288,13 +238,7 @@ public class Manager extends Employee
     {
         displayAllRoles();
 
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_id = ?";
-        final String DELETE_QUERY = "DELETE FROM firmms.roles WHERE role_id = ?";
-
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement checkStatement = connection.prepareStatement(CHECK_QUERY);
-             PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
+        do
         {
             System.out.print("Enter the ID of the role you want to delete: ");
             String roleIDStr = scanner.nextLine();
@@ -304,63 +248,28 @@ public class Manager extends Employee
             {
                 int roleID = Integer.parseInt(roleIDStr);
 
-                if(roleID == 1)
+                if(database.deleteQueryForRoleName(roleID))
                 {
-                    System.out.println("You cannot delete the manager role!");
-                }
-
-                // Role ID kontrolü
-                checkStatement.setInt(1, roleID);
-                try (ResultSet checkResultSet = checkStatement.executeQuery())
-                {
-                    if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
-                    {
-                        // Rol silme işlemi
-                        deleteStatement.setInt(1, roleID);
-                        int rowsAffected = deleteStatement.executeUpdate();
-                        if (rowsAffected > 0)
-                        {
-                            System.out.println("\nRole ID " + roleID + " deleted successfully!\n");
-                        }
-                    }
-                    else
-                    {
-                        System.out.println("\nThere is no such role ID in the system!\n");
-                    }
+                    System.out.println("\nRole ID " + roleID + " deleted successfully!\n");
+                    break;
                 }
             }
             else
             {
-                System.out.println("\nInvalid role ID input!\n");
+                System.out.println("Invalid role ID input!\n");
             }
-        }
-        catch (SQLException sqlException)
-        {
-            sqlException.printStackTrace();
-        }
+        } while (true);
+
     }
 
     // Auxiliary Method for Hire Employee
     public static boolean isRoleIdValid(int roleId)
     {
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String CHECK_QUERY = "SELECT COUNT(*) FROM roles WHERE role_id = ?";
+        String CHECK_QUERY = "SELECT COUNT(*) FROM roles WHERE role_id = ?";
 
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement checkRoleStatement = connection.prepareStatement(CHECK_QUERY))
+        if(database.checkQueryForRoleID(CHECK_QUERY, roleId))
         {
-            checkRoleStatement.setInt(1, roleId);
-            try (ResultSet resultSet = checkRoleStatement.executeQuery())
-            {
-                if (resultSet.next())
-                {
-                    return resultSet.getInt(1) > 0;
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
+            return true;
         }
         return false;
     }
@@ -370,186 +279,132 @@ public class Manager extends Employee
     {
         InputValidation inputValidation = new InputValidation();
 
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String INSERT_QUERY = "INSERT INTO `firmms`.`employees`" +
-        "(`username`,`password`,`name`,`surname`,`dateofbirth`,`dateofstart`,`role`) VALUES (?,?,?,?,?,?,?);";
-
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement insertStatement = connection.prepareStatement(INSERT_QUERY))
+        while (true)
         {
-            while (true)
+            String username;
+            String password = "khas1234";
+            String name;
+            String surname;
+            Date dob;
+            Date dos;
+            int role;
+
+            do
             {
-                do
+                System.out.print("Enter the username of the employee: ");
+                username = scanner.nextLine();
+
+                // Validate role name
+                if (inputValidation.defaultInputValidation(username))
                 {
-                    System.out.print("Enter the username of the employee: ");
-                    String username = scanner.nextLine();
-
-                    // Validate role name
-                    if (inputValidation.defaultInputValidation(username))
-                    {
-                        insertStatement.setString(1, username);
-                        break;
-                    }
-                } while (true);
-
-                String password = "khas1234";
-                insertStatement.setString(2, password);
-
-                do
-                {
-                    System.out.print("Enter the name of the employee: ");
-                    String name = scanner.nextLine();
-
-                    if (inputValidation.noNumberValidation(name))
-                    {
-                        insertStatement.setString(3, name);
-                        break;
-                    }
-                } while (true);
-
-                do
-                {
-                    System.out.print("Enter the surname of the employee: ");
-                    String surname = scanner.nextLine();
-
-                    if (inputValidation.noNumberValidation(surname))
-                    {
-                        insertStatement.setString(4, surname);
-                        break;
-                    }
-                } while (true);
-
-                do
-                {
-                    System.out.print("Enter the date of birth of the employee (YYYY-MM-DD): ");
-                    String dateOfBirth = scanner.nextLine();
-
-                    if (inputValidation.dateValidation(dateOfBirth))
-                    {
-                        Date dob = Date.valueOf(dateOfBirth);
-                        insertStatement.setDate(5, dob);
-                        break;
-                    }
-                } while (true);
-
-
-                do
-                {
-                    System.out.print("Enter the date of start of the employee: ");
-                    String dateOfStart = scanner.nextLine();
-                    Date dos = Date.valueOf(dateOfStart);
-
-                    if (inputValidation.dateValidation(dateOfStart))
-                    {
-                        insertStatement.setDate(6, dos);
-                        break;
-                    }
-                } while (true);
-
-                do
-                {
-                    displayAllRoles();
-
-                    System.out.print("Enter the role of the employee: ");
-                    String roleStr = scanner.nextLine();
-
-                    if (inputValidation.integerValidation(roleStr))
-                    {
-                        int role = Integer.parseInt(roleStr);
-
-                        if(isRoleIdValid(role))
-                        {
-                            insertStatement.setInt(7, role);
-                            break;
-                        }
-                        else
-                        {
-                            System.out.println("There is no such role ID in the system!");
-                        }
-                    }
-                } while (true);
-
-                int rowsInserted = insertStatement.executeUpdate();
-                if (rowsInserted > 0)
-                {
-                    System.out.println("\nThe new employee added to system succesfully!\n");
                     break;
                 }
-                else
+            } while (true);
+
+            do
+            {
+                System.out.print("Enter the name of the employee: ");
+                name = scanner.nextLine();
+
+                if (inputValidation.noNumberValidation(name))
                 {
-                    System.out.println("Failed to add the new employee. Please try again.");
+                    break;
                 }
+            } while (true);
+
+            do
+            {
+                System.out.print("Enter the surname of the employee: ");
+                surname = scanner.nextLine();
+
+                if (inputValidation.noNumberValidation(surname))
+                {
+                    break;
+                }
+            } while (true);
+
+            do
+            {
+                System.out.print("Enter the date of birth of the employee (YYYY-MM-DD): ");
+                String dateOfBirth = scanner.nextLine();
+
+                if (inputValidation.dateValidation(dateOfBirth))
+                {
+                    dob = Date.valueOf(dateOfBirth);
+                    break;
+                }
+            } while (true);
+
+
+            do
+            {
+                System.out.print("Enter the date of start of the employee: ");
+                String dateOfStart = scanner.nextLine();
+
+                if (inputValidation.dateValidation(dateOfStart))
+                {
+                    dos = Date.valueOf(dateOfStart);
+                    break;
+                }
+            } while (true);
+
+            do
+            {
+                displayAllRoles();
+
+                System.out.print("Enter the role of the employee: ");
+                String roleStr = scanner.nextLine();
+
+                if (inputValidation.integerValidation(roleStr))
+                {
+                    role = Integer.parseInt(roleStr);
+
+                    if(isRoleIdValid(role))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        System.out.println("There is no such role ID in the system!");
+                    }
+                }
+            } while (true);
+
+            if (database.insertQueryForHireEmployee(username, password, name, surname, dob, dos, role))
+            {
+                System.out.println("\nThe new employee added to system succesfully!\n");
+                break;
             }
-        }
-        catch (SQLException sqlException)
-        {
-            sqlException.printStackTrace();
+            else
+            {
+                System.out.println("Failed to add the new employee. Please try again.");
+            }
         }
     }
 
     // Fire Employee Method
     public void fireEmployee(Scanner scanner)
     {
-        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        final String CHECK_QUERY1 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ?";
-        final String CHECK_QUERY2 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ? AND role = 1";
-        final String DELETE_QUERY = "DELETE FROM firmms.employees WHERE employee_id = ?";
-
-        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-             PreparedStatement checkStatement1 = connection.prepareStatement(CHECK_QUERY1);
-             PreparedStatement checkStatement2 = connection.prepareStatement(CHECK_QUERY2);
-             PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
+        do
         {
-            while (true)
+            displayAllEmployees();
+
+            System.out.print("\nEnter the ID of the employee you want to delete: ");
+            String employeeIDStr = scanner.nextLine();
+            InputValidation inputValidation = new InputValidation();
+
+            if (inputValidation.integerValidation(employeeIDStr))
             {
-                displayAllEmployees();
+                int employeeID = Integer.parseInt(employeeIDStr);
 
-                System.out.print("\nEnter the ID of the employee you want to delete: ");
-                String employeeIDStr = scanner.nextLine();
-                InputValidation inputValidation = new InputValidation();
-
-                if (inputValidation.integerValidation(employeeIDStr))
+                if (database.deleteQueryForEmployee(employeeID))
                 {
-                    int employeeID = Integer.parseInt(employeeIDStr);
-
-                    checkStatement1.setInt(1, employeeID);
-                    try (ResultSet checkResultSet = checkStatement1.executeQuery())
-                    {
-                        if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
-                        {
-                            checkStatement2.setInt(1, employeeID);
-                            try(ResultSet checkResultSet2 = checkStatement2.executeQuery())
-                            {
-                                if(checkResultSet2.next() && checkResultSet2.getInt(1) > 0)
-                                {
-                                    System.out.println("You cannot delete a manager!");
-                                }
-                                else
-                                {
-                                    deleteStatement.setInt(1, employeeID);
-                                    int rowsAffected = deleteStatement.executeUpdate();
-                                    if (rowsAffected > 0)
-                                    {
-                                        displayAllEmployees();
-                                        System.out.println("\nEmployee with " + employeeID + " employee ID deleted successfully!");
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            System.out.println("There is no such employee ID in the system!");
-                        }
-                    }
+                    displayAllEmployees();
+                    System.out.println("\nEmployee with " + employeeID + " employee ID deleted successfully!");
+                    break;
                 }
             }
-
-        }
-        catch (SQLException sqlException)
-        {
-            sqlException.printStackTrace();
-        }
+        } while (true);
     }
 
     // Run Sorting Algorithm Method
