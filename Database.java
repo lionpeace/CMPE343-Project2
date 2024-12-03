@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Database extends Employee{
+public class Database extends Employee {
 
     final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
@@ -16,7 +16,7 @@ public class Database extends Employee{
         return DriverManager.getConnection(DATABASE_URL, "root", "12345");
     }
 
-    public List<String[]> executeSelectQuery(String SELECT_QUERY) // For displayRoles & displayAllEmployees
+    public List<String[]> returnStrArrayForDisplay(String SELECT_QUERY) // For displayRoles & displayAllEmployees
     {
         List<String[]> results = new ArrayList<>();
         try(Connection connection = connect();
@@ -43,7 +43,7 @@ public class Database extends Employee{
         return results;
     }
 
-    public boolean checkQueryForEmployeeID(String CHECK_QUERY, int employeeID)
+    public boolean selectRoleFromEmployeeID(String CHECK_QUERY, int employeeID)
     {
         try (Connection connection = connect();
              PreparedStatement preparedStatement = connection.prepareStatement(CHECK_QUERY))
@@ -55,12 +55,6 @@ public class Database extends Employee{
             {
                 if (resultSet.next() && resultSet.getInt(1) > 0)
                 {
-                    int role = resultSet.getInt("role");
-                    if (role == 1)
-                    {
-                        System.out.println("\nYou cannot update a manager!\n");
-                        return false;
-                    }
                     return true;
                 }
                 else
@@ -77,12 +71,11 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean checkQueryForRoleID(String CHECK_QUERY, int roleID)
+    public boolean selectCountFromRoleID(String CHECK_QUERY, int roleID)
     {
         try (Connection connection = connect();
              PreparedStatement preparedStatement = connection.prepareStatement(CHECK_QUERY))
         {
-
             preparedStatement.setInt(1, roleID);
 
             try (ResultSet resultSet = preparedStatement.executeQuery())
@@ -104,7 +97,7 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean checkQueryForRoleName(String CHECK_QUERY, String roleName)
+    public boolean selectCountFromRoleName(String CHECK_QUERY, String roleName)
     {
         try (Connection connection = connect();
              PreparedStatement preparedStatement = connection.prepareStatement(CHECK_QUERY))
@@ -131,7 +124,7 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean insertQueryForRoleName(String roleName)
+    public boolean insertRole(String roleName)
     {
         String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_name = ?";
         String INSERT_QUERY = "INSERT INTO firmms.roles (role_name) VALUES (?)";
@@ -139,9 +132,9 @@ public class Database extends Employee{
         try (Connection connection = connect();
              PreparedStatement insertStatement = connection.prepareStatement(INSERT_QUERY))
         {
-            if (checkQueryForRoleName(CHECK_QUERY, roleName))
+            if (selectCountFromRoleName(CHECK_QUERY, roleName))
             {
-                System.out.println("Role name already exists! Please enter a different role name.");
+                System.out.println("\nRole name already exists! Please enter a different role name.\n");
                 return false;
             }
 
@@ -158,7 +151,7 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean deleteQueryForRoleName(int roleID)
+    public boolean deleteRole(int roleID)
     {
         if(roleID == 1)
         {
@@ -173,9 +166,8 @@ public class Database extends Employee{
             try (Connection connection = connect();
                  PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
             {
-                if (checkQueryForRoleID(CHECK_QUERY, roleID))
+                if (selectCountFromRoleID(CHECK_QUERY, roleID))
                 {
-                    // Rol silme işlemi
                     deleteStatement.setInt(1, roleID);
                     int rowsAffected = deleteStatement.executeUpdate();
                     return rowsAffected > 0;
@@ -199,7 +191,7 @@ public class Database extends Employee{
         }
     }
 
-    public boolean insertQueryForHireEmployee(String username, String password, String name, String surname, Date dateOfBirth, Date dateOfStart, int role)
+    public boolean insertEmployee(String username, String password, String name, String surname, Date dateOfBirth, Date dateOfStart, int role)
     {
         String INSERT_QUERY = "INSERT INTO `firmms`.`employees` (`username`, `password`, `name`, `surname`, `dateofbirth`, `dateofstart`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -225,7 +217,7 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean deleteQueryForEmployee(int employeeID)
+    public boolean deleteEmployee(int employeeID)
     {
         String CHECK_QUERY = "SELECT role FROM firmms.employees WHERE employee_id = ?";
         String DELETE_QUERY = "DELETE FROM firmms.employees WHERE employee_id = ?";
@@ -234,17 +226,14 @@ public class Database extends Employee{
              PreparedStatement checkStatement = connection.prepareStatement(CHECK_QUERY);
              PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
         {
-
-            // Role ID kontrolü
             checkStatement.setInt(1, employeeID);
             try (ResultSet checkResultSet = checkStatement.executeQuery())
             {
                 if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
                 {
-                    int role = checkResultSet.getInt("role");
-                    if (role == 1)
+                    if(employeeID == getEmployeeID())
                     {
-                        System.out.println("\nYou cannot delete a manager!\n");
+                        System.out.println("\nYou cannot fire yourself!\n");
                     }
                     else
                     {
@@ -310,70 +299,16 @@ public class Database extends Employee{
                         passwordWithStars = password.substring(0, 2) + stars.toString();
                     }
 
-                    System.out.println("1 - Employee ID: " + resultSet.getInt(1)); // Nobody can edit
-                    System.out.println("2 - Username: " + resultSet.getString("username")); // Only manager can edit
-                    System.out.println("3 - Password: " + passwordWithStars); // Only manager can edit
-                    System.out.println("4 - Role: " + resultSet.getString("role_name")); // Only manager can edit
-                    System.out.println("5 - Name: " + resultSet.getString("name")); // Only manager can edit
-                    System.out.println("6 - Surname: " + resultSet.getString("surname")); // Only manager can edit
-                    System.out.println("7 - Phone Number: " + resultSet.getString("phone_no")); // Everyone can edit
-                    System.out.println("8 - E-mail: " + resultSet.getString("email")); // Everyone can edit
-                    System.out.println("9 - Date of Birth: " + resultSet.getString("dateofbirth")); // Only manager can edit
-                    System.out.println("10 - Date of Start: " + resultSet.getString("dateofstart")); // Only manager cann  edit
-                }
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void displayNonProfileFromDatabase(int employeeID, int currentEmployeeID)
-    {
-        final String SELECT_QUERY = "SELECT e.employee_id, e.username, e.password, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id WHERE e.employee_id = ?";
-
-        try (Connection connection = connect();
-             PreparedStatement selectStatement = connection.prepareStatement(SELECT_QUERY))
-        {
-            selectStatement.setInt(1, employeeID);
-
-            try (ResultSet resultSet = selectStatement.executeQuery())
-            {
-                if (resultSet.next())
-                {
-                    String password = resultSet.getString("password");
-                    StringBuilder stars = new StringBuilder();
-                    String passwordWithStars;
-                    int length = password.length();
-
-                    if (resultSet.getInt(1) != currentEmployeeID)
-                    {
-                        for (int i = 0; i < length; i++)
-                        {
-                            stars.append("*");
-                        }
-                        passwordWithStars = stars.toString();
-                    }
-                    else
-                    {
-                        for (int i = 0; i < length - 2; i++)
-                        {
-                            stars.append("*");
-                        }
-                        passwordWithStars = password.substring(0, 2) + stars.toString();
-                    }
-
-                    System.out.println("1 - Employee ID: " + resultSet.getInt(1)); // Nobody can edit
-                    System.out.println("2 - Username: " + resultSet.getString("username")); // Only manager can edit
-                    System.out.println("3 - Password: " + passwordWithStars); // Only manager can edit
-                    System.out.println("4 - Role: " + resultSet.getString("role_name")); // Only manager can edit
-                    System.out.println("5 - Name: " + resultSet.getString("name")); // Only manager can edit
-                    System.out.println("6 - Surname: " + resultSet.getString("surname")); // Only manager can edit
-                    System.out.println("7 - Phone Number: " + resultSet.getString("phone_no")); // Everyone can edit
-                    System.out.println("8 - E-mail: " + resultSet.getString("email")); // Everyone can edit
-                    System.out.println("9 - Date of Birth: " + resultSet.getString("dateofbirth")); // Only manager can edit
-                    System.out.println("10 - Date of Start: " + resultSet.getString("dateofstart")); // Only manager cann  edit
+                    System.out.println("\n1 - Employee ID: " + resultSet.getInt(1)); // Nobody can edit
+                    System.out.println("\n2 - Username: " + resultSet.getString("username")); // Only manager can edit
+                    System.out.println("\n3 - Password: " + passwordWithStars); // Only manager can edit
+                    System.out.println("\n4 - Role: " + resultSet.getString("role_name")); // Only manager can edit
+                    System.out.println("\n5 - Name: " + resultSet.getString("name")); // Only manager can edit
+                    System.out.println("\n6 - Surname: " + resultSet.getString("surname")); // Only manager can edit
+                    System.out.println("\n7 - Phone Number: " + resultSet.getString("phone_no")); // Everyone can edit
+                    System.out.println("\n8 - E-mail: " + resultSet.getString("email")); // Everyone can edit
+                    System.out.println("\n9 - Date of Birth: " + resultSet.getString("dateofbirth")); // Only manager can edit
+                    System.out.println("\n10 - Date of Start: " + resultSet.getString("dateofstart")); // Only manager cann  edit
                 }
             }
         }
@@ -491,7 +426,7 @@ public class Database extends Employee{
         return false;
     }
 
-    public boolean checkQueryForManager(int employeeID)
+    public boolean checkForManager(int employeeID)
     {
         String MANAGER_CHECK_QUERY = "SELECT role FROM firmms.employees WHERE employee_id = ?";
 
@@ -557,6 +492,8 @@ public class Database extends Employee{
                             {
                                 setUsername(username);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nUsername changed successfully!\n");
                             break;
@@ -597,6 +534,8 @@ public class Database extends Employee{
                             {
                                 setPassword(password);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nPassword changed successfully!\n");
                             break;
@@ -620,7 +559,7 @@ public class Database extends Employee{
 
                 if(presentEmployeeID != employeeID) // If the ID of the editor is not equal to the ID of the edited employee
                 {
-                    if(!checkQueryForManager(employeeID))
+                    if(!checkForManager(employeeID))
                     {
                         String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_id = ?";
 
@@ -635,10 +574,12 @@ public class Database extends Employee{
                             {
                                 int roleID = Integer.parseInt(roleStr);
 
-                                if (checkQueryForRoleID(CHECK_QUERY, roleID))
+                                if (selectCountFromRoleID(CHECK_QUERY, roleID))
                                 {
                                     if(updateValue(UPDATE_QUERY, employeeID, roleID))
                                     {
+                                        System.out.println("\nDatabase is being updated...\n");
+                                        Main.delay();
                                         displayProfileFromDatabase(employeeID, getEmployeeID());
                                         System.out.println("\nRole changed successfully!\n");
                                         break;
@@ -685,6 +626,8 @@ public class Database extends Employee{
                             {
                                 setName(name);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nName changed successfully!\n");
                             break;
@@ -722,6 +665,8 @@ public class Database extends Employee{
                             {
                                 setSurname(surname);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nSurname changed successfully!\n");
                             break;
@@ -763,6 +708,8 @@ public class Database extends Employee{
                             {
                                 setPhoneNo(phoneNo);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nPhone number changed successfully!\n");
                             break;
@@ -802,6 +749,8 @@ public class Database extends Employee{
                             {
                                 setEmail(email);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nName changed successfully!\n");
                             break;
@@ -832,6 +781,8 @@ public class Database extends Employee{
                             {
                                 setDateOfBirth(dob);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nDate of birth changed successfully!\n");
                             break;
@@ -866,6 +817,8 @@ public class Database extends Employee{
                             {
                                 setDateOfStart(dos);
                             }
+                            System.out.println("\nDatabase is being updated...\n");
+                            Main.delay();
                             displayProfileFromDatabase(employeeID, getEmployeeID());
                             System.out.println("\nDate of start changed successfully!\n");
                             break;
@@ -910,6 +863,6 @@ public class Database extends Employee{
 
     @Override
     public void updateProfile(Scanner scanner) {
-
+        // Empty method
     }
 }

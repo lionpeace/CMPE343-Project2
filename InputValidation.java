@@ -3,10 +3,8 @@ import java.util.regex.Pattern;
 
 // For Date Validation
 import java.time.LocalDate;
-import java.sql.Date;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Scanner;
 
 public class InputValidation {
 
@@ -27,9 +25,9 @@ public class InputValidation {
             return false;
         }
 
-        if(input.length() > 150)
+        if(input.length() > 100)
         {
-            System.out.println("\nInput cannot exceed 150 characters!\n");
+            System.out.println("\nInput cannot exceed 100 characters!\n");
             return false;
         }
 
@@ -135,6 +133,12 @@ public class InputValidation {
             return false;
         }
 
+        if(input.length() > 150)
+        {
+            System.out.println("\nInput cannot exceed 150 characters!\n");
+            return false;
+        }
+
         return true;
     }
 
@@ -145,8 +149,13 @@ public class InputValidation {
 
         // This method will be used for phone no inputs
         // Phone numbers will be like:
-        // + is already defined
-            // User will input (with country code) 905383599269
+        // User will input (with country code) 905383599269
+
+        if(input.length() > 40)
+        {
+            System.out.println("\nInput cannot exceed 40 characters!\n");
+            return false;
+        }
 
         if(input == null || input.trim().isEmpty())
         {
@@ -176,6 +185,7 @@ public class InputValidation {
             // at least 1 Uppercase letter
             // at least 1 Lowercase letter
             // at least 1 Special character
+            // at least 1 Digit
             // minimum 8 length
             // maximum 50 length
 
@@ -209,6 +219,12 @@ public class InputValidation {
 
         if (!Pattern.compile("[^a-zA-Z0-9]").matcher(input).find()) {
             System.out.println("\nPassword must contain at least one special letter!\n");
+            return false;
+        }
+
+        if (!Pattern.compile("[0-9]").matcher(input).find())
+        {
+            System.out.println("\nPassword must contain at least one digit!\n");
             return false;
         }
 

@@ -121,7 +121,6 @@ public abstract class Employee
 
     public abstract void updateProfile(Scanner scanner);
 
-
     /*
     public void displayProfile(int presentEmployeeID)
     {

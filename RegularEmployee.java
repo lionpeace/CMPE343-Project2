@@ -24,7 +24,25 @@ public class RegularEmployee extends Employee
 
         do
         {
-            System.out.println("Your Profile");
+            System.out.println("ATTENTION!\n");
+            System.out.println("There are some fields in your profile section that you cannot edit:");
+            System.out.println("Your Employee ID is the ID assigned to you specifically by the system. You cannot change this ID.");
+            System.out.println("Only employees with the Manager role can change your username.");
+            System.out.println("Your role cannot be changed by you.");
+            System.out.println("Only one Manager can change your name and surname in the system.");
+            System.out.println("Only one Manager can change your name and surname in the system.");
+            System.out.println("Your date of birth and start date are inputs provided by a Manager when registering in the system. Therefore, you cannot change this data either. ");
+
+
+            System.out.println("\nThere are some input validation rules for the data you want to change:");
+            System.out.println("Your password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character. And it cannot exceed 50 characters.");
+            System.out.println("Your phone number cannot contain letters or special characters. Inputs with spaces are also not accepted. Please provide input by identifying your country code without using + character. And it cannot exceed 40 characters.");
+            System.out.println("Your email input must be a valid email. Only emails ending with .com will be accepted into the system. And it cannot exceed 100 characters.");
+
+            System.out.println("\nIF THE ABOVE RESTRICTIONS ARE NOT RESPECTED, THE SYSTEM GIVES AN ERROR!\n");
+
+
+            System.out.println("\nYOUR PROFILE\n");
             database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
             System.out.print("Which profile element do you want to update: ");
             String choiceStr = scanner.nextLine();
@@ -46,6 +64,10 @@ public class RegularEmployee extends Employee
                 {
                     break;
                 }
+                else
+                {
+                    database.updateEmployeeInfo(choice, presentEmployeeID, scanner);
+                }
             }
         } while(true);
     }
@@ -55,16 +77,14 @@ public class RegularEmployee extends Employee
         InputValidation inputValidation = new InputValidation();
         Main.clearTheTerminal();
 
-        System.out.println("Welcome, "+ employee.getName() + " " + employee.getSurname());
-        System.out.println("Your Role:  "+ employee.getRole());
-
         if(getNewUser())
         {
             do
             {
                 System.out.println("PASSWORD CHANGE REQUIRED");
                 System.out.println("\nNew employees should set their own secure passwords.");
-                System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.\n");
+                System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character.");
+                System.out.println("The password must not contain spaces!.\n");
 
                 System.out.print("Enter your new password: ");
                 String newPassword = scanner.nextLine();
@@ -76,6 +96,8 @@ public class RegularEmployee extends Employee
                     if(database.updatePassword(UPDATE_QUERY, newPassword, getEmployeeID()))
                     {
                         setPassword(newPassword);
+                        System.out.println("\nDatabase is being updated...\n");
+                        Main.delay();
                         System.out.println("\nPassword updated successfully!\n");
                         break;
                     }
@@ -89,6 +111,9 @@ public class RegularEmployee extends Employee
 
         do
         {
+            System.out.println("Welcome, "+ employee.getName() + " " + employee.getSurname());
+            System.out.println("Your Role:  "+ employee.getRole());
+
             System.out.println("From this menu you can access some operations.\n");
 
             System.out.println("1 - Display Your Profile");
@@ -107,6 +132,7 @@ public class RegularEmployee extends Employee
                 {
                     case 1:
                         Main.clearTheTerminal();
+                        System.out.println("\nYOUR PROFILE\n");
                         database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
                         if (!Main.returnMainMenu(scanner))
                         {

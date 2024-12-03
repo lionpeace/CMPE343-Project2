@@ -11,12 +11,12 @@ public class Authentication
 
         try (Connection conn = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD))
         {
-            String sql = "SELECT e.employee_id, e.username, e.password, e.name, e.surname, e.phone_no, e.email, e.dateOfBirth, e.dateOfStart, e.new_user , r.role_name " +
+            String SELECT_QUERY = "SELECT e.employee_id, e.username, e.password, e.name, e.surname, e.phone_no, e.email, e.dateOfBirth, e.dateOfStart, e.new_user , r.role_name " +
                     "FROM employees e " +
                     "JOIN roles r ON e.role = r.role_id " +
                     "WHERE e.username = ? AND e.password = ?";
 
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            PreparedStatement stmt = conn.prepareStatement(SELECT_QUERY);
             stmt.setString(1, username);
             stmt.setString(2, password);
 

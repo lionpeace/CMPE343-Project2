@@ -2,27 +2,33 @@
 // javac Main.java
 // java -cp ".;mysql-connector-j-9.1.0.jar;src" Main
 
+import java.io.*;
 import java.util.*;
 
 public class Main {
 
-    public static void InputTest(Scanner scanner)
+    public static void ColorfulASCIIArt()
     {
-        InputValidation inputValidation = new InputValidation();
+        String filePath = "C:\\Users\\baris\\OneDrive\\Masaüstü\\CMPE343 Project2\\Group06\\src\\ascii-art.txt";
 
-        while (true) {
-            System.out.print("Bir değer girin: ");
-            String input = scanner.nextLine();
+        List<String> asciiArtLines = new ArrayList<>();
 
-            if(inputValidation.dateValidation(input)) {
-                System.out.println("Geçerli input!!  " + input);
-                break;
-            }
-
-            else
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath)))
+        {
+            String line;
+            while ((line = br.readLine()) != null)
             {
-                System.out.println("Geçersiz input, tekrar değer girmeniz istenecektir!");
+                asciiArtLines.add(line);
             }
+        }
+        catch (IOException e)
+        {
+            System.out.println("An error occurred when reading the file: " + e.getMessage());
+            return;
+        }
+
+        for (String line : asciiArtLines) {
+            System.out.println(line);
         }
     }
 
@@ -118,16 +124,20 @@ public class Main {
         String username = "";
         String password = "";
 
+        ColorfulASCIIArt();
+
+        System.out.println("\nPLEASE ENTER YOUR USERNAME AND PASSWORD TO ACCESS THE SYSTEM.\n");
+
         do
         {
             do {
-                System.out.print("Please enter your username: ");
+                System.out.print("Username: ");
                 username = scanner.nextLine();
 
             } while (!inputValidation.defaultInputValidation(username));
 
             do {
-                System.out.print("Please enter your password: ");
+                System.out.print("Password: ");
                 password = scanner.nextLine();
 
             } while (!inputValidation.defaultInputValidation(password));
