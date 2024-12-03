@@ -534,11 +534,58 @@ public class Manager extends Employee
     }
 
     // Run Sorting Algorithm Method
-    public void runSortingAlgorithms()
+    public void runSortingAlgorithms(Scanner scanner)
     {
         Main.clearTheTerminal();
-        // Implement Radix Sort, Shell Sort, Heap Sort, and Insertion Sort
-        System.out.println("Run Sorting Algorithms");
+
+        InputValidation inputValidation = new InputValidation();
+
+        System.out.println("SORTING ALGORITHMS CALCULATION");
+        System.out.println("\nIn this operation you will specify an array size.");
+        System.out.println("A Random array will be created with the size of the array size you specified.");
+        System.out.println("The values of the array will be random values between -10000 and 10000.");
+        System.out.println("Then this array will be sorted in 4 different ways.");
+        System.out.println("Radix Sort, Shell Sort, Heap Sort, Insertion Sort and Java's Collection Sort algorithms will sort the array.");
+        System.out.println("The execution times of the sorting methods will be shown to the Manager.");
+        System.out.println("In this way, the Manager will be able to see which sorting algorithm is running faster.");
+        System.out.println("The randomly generated and then sorted array will be written to a text file.");
+        System.out.println("In this way, Manager will be able to access the array values.\n");
+
+        do
+        {
+            System.out.print("Enter the size of the array: ");
+            String sizeStr = scanner.nextLine();
+
+            if(inputValidation.integerValidation(sizeStr))
+            {
+                int size = Integer.parseInt(sizeStr);
+
+                if(size < -10000)
+                {
+                    System.out.println("\nSize cannot be lower than -10.000.\n");
+                }
+                else if(size > 10000)
+                {
+                    System.out.println("\nSize cannot be higher than 10000.\n");
+                }
+                else
+                {
+                    System.out.println("\nCalculating...\n");
+                    Main.delay();
+
+                    List<Integer> array = SortingAlgorithms.generateRandomDataset(size);
+                    long[] executionTimes = SortingAlgorithms.calculateExecutionTime(array);
+
+                    SortingAlgorithms.writeToConsole(executionTimes);
+
+                    System.out.println("\nWriting a file...\n");
+                    Main.delay();
+                    String filePath = "C:\\Users\\baris\\OneDrive\\Masaüstü\\CMPE343 Project2\\Group06\\src";
+                    SortingAlgorithms.writeToFile(filePath, array, executionTimes);
+                    break;
+                }
+            }
+        } while (true);
     }
 
     // Manager Menu Method
@@ -718,7 +765,7 @@ public class Manager extends Employee
                         }
                     case 10:
                         Main.clearTheTerminal();
-                        runSortingAlgorithms();
+                        runSortingAlgorithms(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
                             break;

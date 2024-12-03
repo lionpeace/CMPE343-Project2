@@ -1,7 +1,9 @@
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.time.Period;
 
 public class Database extends Employee {
 
@@ -462,6 +464,39 @@ public class Database extends Employee {
         return false;
     }
 
+    public Date returnDateFromDatabase(String dateType, int employeeID) {
+        String SELECT_QUERY = null;
+        if (dateType.equals("dob"))
+        {
+            SELECT_QUERY = "SELECT dateofbirth FROM firmms.employees WHERE employee_id = ?";
+        }
+        else if (dateType.equals("dos"))
+        {
+            SELECT_QUERY = "SELECT dateofstart FROM firmms.employees WHERE employee_id = ?";
+        }
+
+        Date date = null;
+
+        try (Connection connection = connect();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_QUERY))
+        {
+            preparedStatement.setInt(1, employeeID);
+            try (ResultSet resultSet = preparedStatement.executeQuery())
+            {
+                if (resultSet.next())
+                {
+                    date = resultSet.getDate(1);
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
     public void updateEmployeeInfo(int choice, int employeeID , Scanner scanner)
     {
         InputValidation inputValidation = new InputValidation();
@@ -774,18 +809,39 @@ public class Database extends Employee {
                     if(inputValidation.dateValidation(dateOfBirthStr))
                     {
                         java.sql.Date dob = java.sql.Date.valueOf(dateOfBirthStr);
+                        java.sql.Date dos = returnDateFromDatabase("dos",employeeID);
 
-                        if(updateValue(UPDATE_QUERY, employeeID, dob))
+                        LocalDate dobLocal = dob.toLocalDate();
+                        LocalDate dosLocal = dos.toLocalDate();
+
+                        if(dosLocal.isBefore(dobLocal))
                         {
-                            if(employeeID == getEmployeeID())
+                            System.out.println("\nThe start date cannot be before the date of birth!\n");
+                        }
+                        else
+                        {
+                            Period period = Period.between(dobLocal, dosLocal);
+
+                            if(period.getYears() < 18)
                             {
-                                setDateOfBirth(dob);
+                                System.out.println("\nUnder 18 years of age cannot be employed!\n");
                             }
-                            System.out.println("\nDatabase is being updated...\n");
-                            Main.delay();
-                            displayProfileFromDatabase(employeeID, getEmployeeID());
-                            System.out.println("\nDate of birth changed successfully!\n");
-                            break;
+
+                            else
+                            {
+                                if(updateValue(UPDATE_QUERY, employeeID, dob))
+                                {
+                                    if(employeeID == getEmployeeID())
+                                    {
+                                        setDateOfBirth(dob);
+                                    }
+                                    System.out.println("\nDatabase is being updated...\n");
+                                    Main.delay();
+                                    displayProfileFromDatabase(employeeID, getEmployeeID());
+                                    System.out.println("\nDate of birth changed successfully!\n");
+                                    break;
+                                }
+                            }
                         }
                     }
                 } while(true);
@@ -810,18 +866,36 @@ public class Database extends Employee {
                     if(inputValidation.dateValidation(dateOfStartStr))
                     {
                         java.sql.Date dos = java.sql.Date.valueOf(dateOfStartStr);
+                        java.sql.Date dob = returnDateFromDatabase("dob",employeeID);
 
-                        if(updateValue(UPDATE_QUERY, employeeID, dos))
+                        LocalDate dosLocal = dos.toLocalDate();
+                        LocalDate dobLocal = dob.toLocalDate();
+
+                        if(dosLocal.isBefore(dobLocal))
                         {
-                            if(employeeID == getEmployeeID())
-                            {
-                                setDateOfStart(dos);
+                            System.out.println("\nThe start date cannot be before the date of birth!\n");
+                        }
+                        else {
+                            Period period = Period.between(dobLocal, dosLocal);
+
+                            if (period.getYears() < 18) {
+                                System.out.println("\nUnder 18 years of age cannot be employed!\n");
                             }
-                            System.out.println("\nDatabase is being updated...\n");
-                            Main.delay();
-                            displayProfileFromDatabase(employeeID, getEmployeeID());
-                            System.out.println("\nDate of start changed successfully!\n");
-                            break;
+                            else
+                            {
+                                if(updateValue(UPDATE_QUERY, employeeID, dos))
+                                {
+                                    if(employeeID == getEmployeeID())
+                                    {
+                                        setDateOfStart(dos);
+                                    }
+                                    System.out.println("\nDatabase is being updated...\n");
+                                    Main.delay();
+                                    displayProfileFromDatabase(employeeID, getEmployeeID());
+                                    System.out.println("\nDate of start changed successfully!\n");
+                                    break;
+                                }
+                            }
                         }
                     }
                 } while(true);

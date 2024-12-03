@@ -6,7 +6,19 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Provides input validation for various user inputs.
+ * Validation methods for general input, integers, characters are done here.
+ */
+
 public class InputValidation {
+
+    /**
+     * Validates a generic string entry. Checks that the input is not empty or null.
+     * contains no spaces or tabs and cannot exceed 150 characters.
+     * @param input Returns the input string to validate.
+     * Returns true if the input is valid, false otherwise.
+     */
 
     public boolean defaultInputValidation(String input)
     {
@@ -33,6 +45,13 @@ public class InputValidation {
 
         return true;
     }
+
+    /**
+     * Method that validates a string input as an integer. Makes sure the input is not null,
+     * does not contain a blank space or tab and represents a valid integer.
+     * @param input Returns the input string to validate.
+     * Returns true if the input is an integer, false otherwise.
+     */
 
     public boolean integerValidation(String input)
     {
@@ -74,6 +93,13 @@ public class InputValidation {
         return true; // dummy
     }
 
+    /**
+     * Method that provides validation for a single character input. Check whether the input is null.
+     * empty, a single letter, and contains no spaces or tabs.
+     * @param input Returns the input string to validate.
+     * Returns true if the input is a valid single character, false otherwise.
+     */
+
     public boolean charValidation(String input)
     {
         // String input for return main menu
@@ -108,11 +134,17 @@ public class InputValidation {
         return true;
     }
 
+    /**
+     * Method that validates a string input to ensure that it does not contain any numbers.
+     * or checks for special characters. This is used for first or last name entries.
+     *
+     * @param input Returns the input string to validate.
+     * Returns true if the input is valid, false otherwise.
+     */
+
     public boolean noNumberValidation(String input)
     {
         // String input for inputs without any number
-        // Like; name, surname
-
         // This method will be used for name and surname inputs
 
         if(input == null || input.trim().isEmpty())
@@ -142,14 +174,16 @@ public class InputValidation {
         return true;
     }
 
+    /**
+     * Method for verifying a phone number entry. Allows input to contain only numbers and spaces.
+     * @param input Returns the phone number string to validate.
+     * Returns true if the input is valid, false otherwise.
+     */
+
     public boolean phoneNoValidation(String input)
     {
         // String input for inputs without letter
         // Like; phone_no
-
-        // This method will be used for phone no inputs
-        // Phone numbers will be like:
-        // User will input (with country code) 905383599269
 
         if(input.length() > 40)
         {
@@ -175,19 +209,21 @@ public class InputValidation {
         }
     }
 
+    /**
+     * Method to verify password entry. It is checked whether the password meets the specified criteria.
+     * - At least 1 capital letter
+     * - At least 1 lowercase letter
+     * - At least 1 special character
+     * - Minimum length of 8 characters, maximum length of 50 characters
+     *
+     * @param input Returns the password string to verify.
+     * Returns true if the password is valid, false otherwise.
+     */
+
     public boolean passwordValidation(String input)
     {
         // String input for password inputs
-        // For password
         // It will be used Authentication Class
-
-        // Password has to:
-            // at least 1 Uppercase letter
-            // at least 1 Lowercase letter
-            // at least 1 Special character
-            // at least 1 Digit
-            // minimum 8 length
-            // maximum 50 length
 
         if(input == null || input.trim().isEmpty())
         {
@@ -231,15 +267,18 @@ public class InputValidation {
         return true;
     }
 
+    /**
+     * Method that validates an email input. The email is ensured to meet basic format rules. Password:
+     * - Contains a single '@'
+     * - ends with '.com'
+     * - No spaces or Turkish characters
+     * @param input Returns the email string to validate.
+     * Returns true if the email is valid, false otherwise.
+     */
+
     public boolean emailValidation(String input)
     {
         // String input for email inputs
-
-        // Email has to:
-            // .com at the end
-            // 1 @ character however:
-                // at least 1 character should be there between .com and @
-                // at least 1 character should be there before the @
 
         if(input == null || input.trim().isEmpty())
         {
@@ -291,12 +330,17 @@ public class InputValidation {
         return true;
     }
 
+    /**
+     * Method that validates a date entry in YYYY-MM-DD format. Checks if the date is valid.
+     * Follows the specified format and takes into account leap years in February.
+     *
+     * @param input Returns the date string to validate.
+     * Returns true if the date is valid, false otherwise.
+     */
+
     public boolean dateValidation(String input)
     {
         // String input for date inputs
-
-        // Date should be input like:
-            // YYYY-MM-DD
 
         if(input == null || input.trim().isEmpty())
         {
