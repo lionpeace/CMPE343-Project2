@@ -1,84 +1,57 @@
 import java.sql.*;
 import java.util.Scanner;
-import java.util.List;
+
+
+/**
+* The Manager class is a subclass of the Employee class and represents a manager in the system.
+* This method handles manager-specific operations such as updating profiles, hiring or firing employees, and other management-related tasks.
+* Constructs a Manager object with the specified details.
+* The manager is initialized with a username, password, role, name, surname, phone number, email, date of birth, and date of start.
+* This constructor calls the constructor (Employee) to initialize the common properties.
+* @param username the username of the manager.
+* @param password the password of the manager.
+* @param role the role of the manager.
+* @param name the name of the manager.
+* @param surname the surname of the manager.
+* @param phoneNo the phone number of the manager.
+* @param email the email of the manager.
+* @param dateOfBirth the date of birth of the manager.
+* @param dateOfStart the date the manager started at the company.
+*/
 
 public class Manager extends Employee
 {
-    private static Database database;
-
-    // Constructor Method
-    public Manager(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
+    public Manager(String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart)
     {
-        super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
-        database = new Database(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
+        super(username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart);
     }
-
-    // Update Your Profile Method
+/**
+* This method allows the administrator to update profile information.
+* Clears the terminal screen and prints a message indicating that the profile update operation can be performed here.
+*/
     @Override
-    public void updateProfile(Scanner scanner) // Update MANAGER profile
+    public void updateProfile()
     {
-        InputValidation inputValidation = new InputValidation();
-
-        int presentEmployeeID = getEmployeeID();
-
-        do
-        {
-            System.out.println("ATTENTION!\n");
-            System.out.println("There are some fields in your profile section that you cannot edit:");
-            System.out.println("Your Employee ID is the ID assigned to you specifically by the system. You cannot change this ID.");
-            System.out.println("Your Manager role is a special role assigned to you. It is not possible for you to change this role. Only another manager can change your role.");
-
-            System.out.println("\nThere are some input validation rules for the data you want to change:");
-            System.out.println("Your username cannot contain any space. And it cannot exceed 100 characters.");
-            System.out.println("Your password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character. And it cannot exceed 50 characters.");
-            System.out.println("Your name cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-            System.out.println("Your surname cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-            System.out.println("Your phone number cannot contain letters or special characters. Inputs with spaces are also not accepted. Please provide input by identifying your country code without using + character. And it cannot exceed 40 characters.");
-            System.out.println("Your email input must be a valid email. Only emails ending with .com will be accepted into the system. And it cannot exceed 100 characters.");
-            System.out.println("Your date of birth must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-            System.out.println("Your date of start must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-
-            System.out.println("\nIF THE ABOVE RESTRICTIONS ARE NOT RESPECTED, THE SYSTEM GIVES AN ERROR!\n");
-
-            System.out.println("\nYOUR PROFILE\n");
-            database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
-            System.out.println("\nIf you want to quit this operation please enter 11.\n");
-
-            System.out.print("Which profile element do you want to update: ");
-            String choiceStr = scanner.nextLine();
-
-            if(inputValidation.integerValidation(choiceStr))
-            {
-                int choice = Integer.parseInt(choiceStr);
-
-                if(choice < 1 || choice > 11)
-                {
-                    System.out.println("\nInvalid choice!\n");
-                    continue;
-                }
-                if(choice == 1)
-                {
-                    System.out.println("\nYou cannot edit the employee ID!\n");
-                }
-                else if(choice == 11)
-                {
-                    break;
-                }
-                else
-                {
-                    database.updateEmployeeInfo(choice, getEmployeeID(), scanner);
-                }
-            }
-        } while(true);
+        Main.clearTheTerminal();
+        System.out.println("Update Profile");
     }
 
-    /*
-    // Display All Employees Method
+/**
+* This method retrieves all employees from the database and displays them.
+* It connects to the MySQL database. It executes a JOIN query to join the employee details with their roles. The retrieved data is Employee ID, Username, First Name, Last Name, Phone Number, Date of Birth, Start Date, Email, Role Name.
+* The method outputs the data in a tabular format on the terminal.
+* It establishes a connection to the database using JDBC.
+* It executes a SQL SELECT query with a JOIN between the `employees` and `roles` tables.
+* It retrieves and formats the results using `ResultSet` and `ResultSetMetaData`.
+* If an SQLException occurs during the operation, the stack trace is printed.
+*/
     public void displayAllEmployees()
     {
+        Main.clearTheTerminal();
+
         // Display all employees
         final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
+        final String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
 
         try {
             Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
@@ -111,229 +84,161 @@ public class Manager extends Employee
         {
             sqlException.printStackTrace();
         }
-    }
-    */
 
-    public void displayAllEmployees()
-    {
-        // Display all employees
-        String SELECT_QUERY = "SELECT e.employee_id, e.username, e.name, e.surname, e.phone_no, e.dateofbirth, e.dateofstart, e.email, r.role_name FROM firmms.employees e JOIN firmms.roles r ON e.role = r.role_id";
-
-        List<String[]> employees = database.returnStrArrayForDisplay(SELECT_QUERY);
-
-        System.out.print("LIST OF EMPLOYEES\n\n");
-
-        String RESET = "\u001B[0m";
-        String GREEN = "\u001B[32m";
-
-        String[] columns = {"Employee ID: ", "Username: ", "Name: ", "Surname: ", "Phone Number: ", "Date of Birth: ", "Date of Start: ", "Email: ", "Role: "};
-        int i = 0;
-
-        for(String[] employee : employees)
-        {
-            for(String emp : employee)
-            {
-                if(emp == null)
-                {
-                    if(i == 8)
-                    {
-                        System.out.printf(GREEN + columns[i] + "- ", emp + RESET);
-                    }
-                    else
-                    {
-                        System.out.printf(GREEN + columns[i] + "- | ", emp + RESET);
-                    }
-                }
-                else
-                {
-                    if(i == 8)
-                    {
-                        System.out.printf(GREEN + columns[i] + "%s ", emp + RESET);
-
-                    }
-                    else
-                    {
-                        System.out.printf(GREEN + columns[i] + "%s | ", emp + RESET);
-                    }
-                }
-                i++;
-
-                if(i == 9)
-                {
-                    i = 0;
-                }
-            }
-            System.out.println("\n");
-        }
     }
 
-    // Auxiliary Method for Update Employee Profile
-    public static boolean isEmployeeIdValid(int employeeID)
-    {
-        String CHECK_QUERY = "SELECT role FROM employees WHERE employee_id = ?";
+/**
+* This method allows an employee's profile information to be updated.
+* It acts as a placeholder for the profile update function.
+* Fields such as first name, last name, and other non-sensitive details can be changed.
+*/
 
-        if(database.selectRoleFromEmployeeID(CHECK_QUERY, employeeID))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    // Update Employee Profile Method
-    public void updateEmployeeProfile(Scanner scanner)
+    public void updateEmployeeProfile()
     {
-        InputValidation inputValidation = new InputValidation();
+        Main.clearTheTerminal();
         // Update non-profile fields (name, surname, etc.)
-
-        System.out.println("ATTENTION!\n");
-        System.out.println("The employee's data that you can edit is restricted:");
-        System.out.println("You cannot see/edit the employee's password.");
-        System.out.println("Only the employee can update his/her email. You are not authorized to edit it.");
-        System.out.println("You can't edit your employee phone number. Only the employee can make this edit.");
-        System.out.println("If you select yourself from the Employee list, this will be the same operation as updating your own profile.");
-
-
-        System.out.println("\nThere are some input validation rules for the data you want to change:");
-        System.out.println("The username cannot contain any space. And it cannot exceed 100 characters.");
-        System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character. And it cannot exceed 50 characters.");
-        System.out.println("The name cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-        System.out.println("The surname cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-        System.out.println("The phone number cannot contain letters or special characters. Inputs with spaces are also not accepted. Please provide input by identifying your country code without using + character. And it cannot exceed 40 characters.");
-        System.out.println("The email input must be a valid email. Only emails ending with .com will be accepted into the system. And it cannot exceed 100 characters.");
-        System.out.println("The date of birth must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-        System.out.println("The date of start must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-
-        System.out.println("\nIF THE ABOVE RESTRICTIONS ARE NOT RESPECTED, THE SYSTEM GIVES AN ERROR!\n");
-
-        do
-        {
-            displayAllEmployees();
-            System.out.print("Enter Employee ID that you want to update: ");
-            String employeeChoiceStr = scanner.nextLine();
-
-            if(inputValidation.integerValidation(employeeChoiceStr))
-            {
-                int employeeChoice = Integer.parseInt(employeeChoiceStr);
-
-                if(isEmployeeIdValid(employeeChoice))
-                {
-                    Main.clearTheTerminal();
-
-                    do
-                    {
-                        System.out.println("\nTHE EMPLOYEE PROFILE\n");
-                        database.displayProfileFromDatabase(employeeChoice, getEmployeeID());
-                        System.out.println("\nIf you want to quit this operation please enter 11.\n");
-                        System.out.print("Which profile element do you want to update: ");
-                        String choiceStr = scanner.nextLine();
-
-                        if(inputValidation.integerValidation(choiceStr))
-                        {
-                            int choice = Integer.parseInt(choiceStr);
-
-                            if(choice < 1 || choice > 11)
-                            {
-                                System.out.println("\nInvalid choice!\n");
-                                continue;
-                            }
-                            if(choice == 1)
-                            {
-                                System.out.println("\nYou cannot edit the employee ID!\n");
-                            }
-                            else if(choice == 11)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                database.updateEmployeeInfo(choice, employeeChoice ,scanner);
-                            }
-                        }
-                    } while (true);
-
-                    break;
-                }
-            }
-        } while(true);
+        System.out.println("Update Employee Profile");
     }
 
-    // Display All Roles Method
-    public static void displayAllRoles()
+
+/**
+* This method retrieves and displays all roles from the database.
+* It queries the `roles` table to get the role details and displays them in a table in the console.
+* The information displayed is the Role ID and Role Name.
+* This method is designed to provide a clear overview of all the roles available in the system.
+*/
+    public void displayAllRoles()
     {
-        String SELECT_QUERY = "SELECT * FROM firmms.roles";
-        List<String[]> roles = database.returnStrArrayForDisplay(SELECT_QUERY);
+        Main.clearTheTerminal();
 
-        System.out.print("LIST OF ROLES\n\n");
+        // Display all roles
+        // Display all employees
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String SELECT_QUERY = "SELECT * FROM firmms.roles";
 
-        System.out.print("Role ID\t\tRole Name\n\n");
+        try {
+            Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(SELECT_QUERY);
 
-        for(String[] role : roles)
-        {
-            for(String r: role)
+            // get ResultSet's meta data
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int numberOfColumns = metaData.getColumnCount();
+
+            System.out.print("List of Roles\n\n");
+
+            // display the names of the columns in the ResultSet
+
+            System.out.print("Role ID\tRole Name\n\n");
+
+            // display query results
+            while (resultSet.next())
             {
-                System.out.printf("%-8s\t", r);
+                for (int i = 1; i <= numberOfColumns; i++)
+                {
+                    System.out.printf("%-8s\t", resultSet.getObject(i));
+                }
+                System.out.println();
             }
-            System.out.println();
+
+            connection.close();
+        }
+        catch (SQLException sqlException)
+        {
+            sqlException.printStackTrace();
         }
     }
 
-    // Add New Role Method
+/**
+ * This method allows the user to add a new role to the system.
+ * It first prompts the user to enter a role name, validates the input.
+ *Checks if the role name already exists in the database.
+*  If not, inserts the new role into the `roles` table.
+ * @param scanner the scanner object used to read user input from the console.
+ */
+
     public void addNewRole(Scanner scanner)
     {
+        Main.clearTheTerminal();
         InputValidation inputValidation = new InputValidation();
 
-        while (true)
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_name = ?";
+        final String INSERT_QUERY = "INSERT INTO firmms.roles (role_name) VALUES (?)";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement checkStatement = connection.prepareStatement(CHECK_QUERY);
+             PreparedStatement insertStatement = connection.prepareStatement(INSERT_QUERY))
         {
-            System.out.println("ATTENTION!\n");
-            System.out.println("As a Manager, you can add a new role to the system.");
-
-            System.out.println("\nThere are some input validation rules for adding a new role:");
-            System.out.println("The new role cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-            System.out.println("If there is a role in the system in the role you are trying to create, your request will be invalidated.");
-
-            System.out.println("\nIF THE ABOVE RESTRICTIONS ARE NOT RESPECTED, THE SYSTEM GIVES AN ERROR!\n");
-
-            System.out.print("Enter the new role name: ");
-            String newRoleName = scanner.nextLine();
-
-            // Validate role name
-            if (inputValidation.noNumberValidation(newRoleName))
+            while (true)
             {
-                if (newRoleName.length() > 150)
-                {
-                    System.out.println("Role name cannot be longer than 150 characters!");
-                    continue;
-                }
+                System.out.print("Enter the new role name: ");
+                String newRoleName = scanner.nextLine();
 
-                if (database.insertRole(newRoleName))
+                // Validate role name
+                if (inputValidation.noNumberValidation(newRoleName))
                 {
-                    System.out.println("\nDatabase is being updated...\n");
-                    Main.delay();
-                    displayAllRoles();
-                    System.out.println("\nNew role '" + newRoleName + "' added to the system successfully!\n");
-                    break;
+                    if (newRoleName.length() > 150)
+                    {
+                        System.out.println("Role name cannot be longer than 150 characters!");
+                        continue;
+                    }
+
+                    // Check if role name already exists
+                    checkStatement.setString(1, newRoleName);
+                    try (ResultSet checkResultSet = checkStatement.executeQuery())
+                    {
+                        if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
+                        {
+                            System.out.println("Role name already exists! Please enter a different role name.");
+                            continue;
+                        }
+                    }
+
+                    // Insert new role
+                    insertStatement.setString(1, newRoleName);
+
+                    int rowsInserted = insertStatement.executeUpdate();
+                    if (rowsInserted > 0)
+                    {
+                        System.out.println("\nNew role '" + newRoleName + "' added to the system successfully!\n");
+                        break;
+                    }
+                    else
+                    {
+                        System.out.println("Failed to add the new role. Please try again.");
+                    }
                 }
             }
         }
+        catch (SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
     }
 
-    // Delete Role Method
+/**
+* This method allows the user to delete a role from the system.
+* After displaying all roles, the user is prompted to enter the role ID that they want to delete.
+* The method verifies that the entered role ID is valid and exists in the system.
+* If the role is valid and not an administrator role (role ID 1), the role is deleted.
+* Otherwise, an appropriate message is displayed.
+*
+* @param scanner The scanner object used to read user input from the console.
+*/
     public void deleteRole(Scanner scanner)
     {
-        do
+        displayAllRoles();
+
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String CHECK_QUERY = "SELECT COUNT(*) FROM firmms.roles WHERE role_id = ?";
+        final String DELETE_QUERY = "DELETE FROM firmms.roles WHERE role_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement checkStatement = connection.prepareStatement(CHECK_QUERY);
+             PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
         {
-            System.out.println("ATTENTION!\n");
-            System.out.println("As a Manager, you can delete a role from the system.");
-            System.out.println("But there are some things to be aware of:");
-            System.out.println("It is not possible to delete the Manager role. The Manager role is a special role created for system control.");
-            System.out.println("If you want to delete a role, you must first delete the user with that role or change the role of that user. ");
-            System.out.println("You will delete roles with the IDs of the roles in the system.");
-
-            System.out.println("\nIF YOU ENTER A ROLE THAT IS NOT IN THE SYSTEM, YOU WILL GET AN ERROR!\n");
-
-            displayAllRoles();
-
-            System.out.print("\nEnter the ID of the role you want to delete: ");
+            System.out.print("Enter the ID of the role you want to delete: ");
             String roleIDStr = scanner.nextLine();
             InputValidation inputValidation = new InputValidation();
 
@@ -341,199 +246,289 @@ public class Manager extends Employee
             {
                 int roleID = Integer.parseInt(roleIDStr);
 
-                if(database.deleteRole(roleID))
+                if(roleID == 1)
                 {
-                    System.out.println("\nDatabase is being updated...\n");
-                    Main.delay();
-                    displayAllRoles();
-                    System.out.println("\nRole ID " + roleID + " deleted successfully!\n");
-                    break;
+                    System.out.println("You cannot delete the manager role!");
                 }
-            }
-            else
-            {
-                System.out.println("Invalid role ID input!\n");
-            }
-        } while (true);
 
-    }
-
-    // Auxiliary Method for Hire Employee
-    public static boolean isRoleIdValid(int roleId)
-    {
-        String CHECK_QUERY = "SELECT COUNT(*) FROM roles WHERE role_id = ?";
-
-        if(database.selectCountFromRoleID(CHECK_QUERY, roleId))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    // Hire Employee Method
-    public void hireEmployee(Scanner scanner)
-    {
-        InputValidation inputValidation = new InputValidation();
-
-        do
-        {
-            String username;
-            String password = "khas1234";
-            String name;
-            String surname;
-            Date dob;
-            Date dos;
-            int role;
-
-            System.out.println("ATTENTION!\n");
-            System.out.println("You can hire a new employee as a manager.");
-            System.out.println("The system asks you to enter the username, first name, last name, date of birth, start date and role of the new employee.");
-            System.out.println("The new employee's password is automatically set equal to the default password by the system.");
-            System.out.println("Employee's information such as password, email and phone number cannot be entered by the manager.");
-            System.out.println("When the employee logs into the system, he/she will enter this information into the system if he/she wishes.");
-
-            System.out.println("\nThere are some input validation rules for the data you want to add:");
-            System.out.println("The username cannot contain any space. And it cannot exceed 100 characters.");
-            System.out.println("The name cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-            System.out.println("The surname cannot contain any numbers or special characters. And it cannot exceed 150 characters.");
-            System.out.println("The date of birth must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-            System.out.println("The date of start must be in YYYY-MM-DD format. Entries in other formats are not accepted.");
-
-            System.out.println("\nIF THE ABOVE RESTRICTIONS ARE NOT RESPECTED, THE SYSTEM GIVES AN ERROR!\n");
-
-
-            do
-            {
-                System.out.print("Enter the username of the employee: ");
-                username = scanner.nextLine();
-
-                // Validate role name
-                if (inputValidation.defaultInputValidation(username))
+                // Role ID kontrolü
+                checkStatement.setInt(1, roleID);
+                try (ResultSet checkResultSet = checkStatement.executeQuery())
                 {
-                    break;
-                }
-            } while (true);
-
-            do
-            {
-                System.out.print("Enter the name of the employee: ");
-                name = scanner.nextLine();
-
-                if (inputValidation.noNumberValidation(name))
-                {
-                    break;
-                }
-            } while (true);
-
-            do
-            {
-                System.out.print("Enter the surname of the employee: ");
-                surname = scanner.nextLine();
-
-                if (inputValidation.noNumberValidation(surname))
-                {
-                    break;
-                }
-            } while (true);
-
-            do
-            {
-                System.out.print("Enter the date of birth of the employee (YYYY-MM-DD): ");
-                String dateOfBirth = scanner.nextLine();
-
-                if (inputValidation.dateValidation(dateOfBirth))
-                {
-                    dob = Date.valueOf(dateOfBirth);
-                    break;
-                }
-            } while (true);
-
-
-            do
-            {
-                System.out.print("Enter the date of start of the employee: ");
-                String dateOfStart = scanner.nextLine();
-
-                if (inputValidation.dateValidation(dateOfStart))
-                {
-                    dos = Date.valueOf(dateOfStart);
-                    break;
-                }
-            } while (true);
-
-            do
-            {
-                displayAllRoles();
-
-                System.out.print("Enter the role of the employee: ");
-                String roleStr = scanner.nextLine();
-
-                if (inputValidation.integerValidation(roleStr))
-                {
-                    role = Integer.parseInt(roleStr);
-
-                    if(isRoleIdValid(role))
+                    if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
                     {
-                        break;
+                        // Rol silme işlemi
+                        deleteStatement.setInt(1, roleID);
+                        int rowsAffected = deleteStatement.executeUpdate();
+                        if (rowsAffected > 0)
+                        {
+                            System.out.println("\nRole ID " + roleID + " deleted successfully!");
+                        }
                     }
                     else
                     {
                         System.out.println("There is no such role ID in the system!");
                     }
                 }
-            } while (true);
-
-            if (database.insertEmployee(username, password, name, surname, dob, dos, role))
-            {
-                System.out.println("\nDatabase is being updated...\n");
-                Main.delay();
-                displayAllEmployees();
-                System.out.println("\nThe new employee added to system successfully!\n");
-                break;
             }
             else
             {
-                System.out.println("Failed to add the new employee. Please try again.");
+                System.out.println("Invalid role ID input!");
             }
-        } while(true);
+        }
+        catch (SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
     }
 
-    // Fire Employee Method
-    public void fireEmployee(Scanner scanner)
+/**
+* This method checks if the requested role ID exists in the database.
+* Executes a query to check if a role with the requested ID exists in the `roles` table.
+* Returns true if the role ID is valid and exists in the system, otherwise false.
+*
+* @param roleId the role ID to check.
+* @return returns true if the role ID exists in the system, otherwise false.
+*/
+    public static boolean isRoleIdValid(int roleId)
     {
-        do
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String CHECK_QUERY = "SELECT COUNT(*) FROM roles WHERE role_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement checkRoleStatement = connection.prepareStatement(CHECK_QUERY))
         {
-            System.out.println("ATTENTION!\n");
-            System.out.println("You can fire an employee as a manager.");
-            System.out.println("The system asks you which employee with which ID you want to delete.");
-            System.out.println("Enter the ID of the user you want to delete and the user will be deleted from the system.");
-            System.out.println("Authorizes system managers to delete another manager. But be careful when deleting another manager!");
-
-            System.out.println("\nIF YOU ENTER A EMPLOYEE THAT IS NOT IN THE SYSTEM, YOU WILL GET AN ERROR!\n");
-
-            displayAllEmployees();
-
-            System.out.print("\nEnter the ID of the employee you want to delete: ");
-            String employeeIDStr = scanner.nextLine();
-            InputValidation inputValidation = new InputValidation();
-
-            if (inputValidation.integerValidation(employeeIDStr))
+            checkRoleStatement.setInt(1, roleId);
+            try (ResultSet resultSet = checkRoleStatement.executeQuery())
             {
-                int employeeID = Integer.parseInt(employeeIDStr);
-
-                if (database.deleteEmployee(employeeID))
+                if (resultSet.next())
                 {
-                    System.out.println("\nDatabase is being updated...\n");
-                    Main.delay();
-                    displayAllEmployees();
-                    System.out.println("\nEmployee with " + employeeID + " employee ID deleted successfully!");
-                    break;
+                    return resultSet.getInt(1) > 0;
                 }
             }
-        } while (true);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
     }
 
-    // Run Sorting Algorithm Method
+/**
+* This method adds a new employee to the system.
+* It asks the user to enter various details about the employee (username, first name, last name, date of birth, start date, and role),
+* After validating the inputs, it inserts the data into the `employees` table in the database.
+* The method performs input validation using the `InputValidation` class to ensure that the inputs are correct,
+* If the inputs are valid, a new employee record is created in the database.
+* @param scanner The scanner object used to read the user input.
+*/
+
+    public void hireEmployee(Scanner scanner)
+    {
+        Main.clearTheTerminal();
+
+        InputValidation inputValidation = new InputValidation();
+
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String INSERT_QUERY = "INSERT INTO `firmms`.`employees`" +
+        "(`username`,`password`,`name`,`surname`,`dateofbirth`,`dateofstart`,`role`) VALUES (?,?,?,?,?,?,?);";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement insertStatement = connection.prepareStatement(INSERT_QUERY))
+        {
+            while (true)
+            {
+                do
+                {
+                    System.out.print("Enter the username of the employee: ");
+                    String username = scanner.nextLine();
+
+                    // Validate role name
+                    if (inputValidation.defaultInputValidation(username))
+                    {
+                        insertStatement.setString(1, username);
+                        break;
+                    }
+                } while (true);
+
+                String password = "khas1234";
+                insertStatement.setString(2, password);
+
+                do
+                {
+                    System.out.print("Enter the name of the employee: ");
+                    String name = scanner.nextLine();
+
+                    if (inputValidation.noNumberValidation(name))
+                    {
+                        insertStatement.setString(3, name);
+                        break;
+                    }
+                } while (true);
+
+                do
+                {
+                    System.out.print("Enter the surname of the employee: ");
+                    String surname = scanner.nextLine();
+
+                    if (inputValidation.noNumberValidation(surname))
+                    {
+                        insertStatement.setString(4, surname);
+                        break;
+                    }
+                } while (true);
+
+                do
+                {
+                    System.out.print("Enter the date of birth of the employee (YYYY-MM-DD): ");
+                    String dateOfBirth = scanner.nextLine();
+
+                    if (inputValidation.dateValidation(dateOfBirth))
+                    {
+                        Date dob = Date.valueOf(dateOfBirth);
+                        insertStatement.setDate(5, dob);
+                        break;
+                    }
+                } while (true);
+
+
+                do
+                {
+                    System.out.print("Enter the date of start of the employee: ");
+                    String dateOfStart = scanner.nextLine();
+                    Date dos = Date.valueOf(dateOfStart);
+
+                    if (inputValidation.dateValidation(dateOfStart))
+                    {
+                        insertStatement.setDate(6, dos);
+                        break;
+                    }
+                } while (true);
+
+                do
+                {
+                    displayAllRoles();
+
+                    System.out.print("Enter the role of the employee: ");
+                    String roleStr = scanner.nextLine();
+
+                    if (inputValidation.integerValidation(roleStr))
+                    {
+                        int role = Integer.parseInt(roleStr);
+
+                        if(isRoleIdValid(role))
+                        {
+                            insertStatement.setInt(7, role);
+                            break;
+                        }
+                        else
+                        {
+                            System.out.println("There is no such role ID in the system!");
+                        }
+                    }
+                } while (true);
+
+                int rowsInserted = insertStatement.executeUpdate();
+                if (rowsInserted > 0)
+                {
+                    System.out.println("\nThe new employee added to system succesfully!\n");
+                    break;
+                }
+                else
+                {
+                    System.out.println("Failed to add the new employee. Please try again.");
+                }
+            }
+        }
+        catch (SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+
+/**
+* This method allows an employee to be deleted from the system.
+* Prompts the user to enter the employee ID and verifies that the employee exists in the database.
+* Also checks if the employee is a manager (role ID = 1).
+* If the employee is not a manager, the employee is deleted from the `employees` table in the database.
+* The method first verifies the employee ID entered and checks if the employee exists in the system.
+* Checks if the employee has an administrator role. If the employee is a manager, it cannot be deleted.
+* If the employee is not a manager, the record is deleted from the database.
+*
+* @param scanner the scanner object used to read the user input.
+*/
+
+    public void fireEmployee(Scanner scanner)
+    {
+        Main.clearTheTerminal();
+
+        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+        final String CHECK_QUERY1 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ?";
+        final String CHECK_QUERY2 = "SELECT COUNT(*) FROM firmms.employees WHERE employee_id = ? AND role = 1";
+        final String DELETE_QUERY = "DELETE FROM firmms.employees WHERE employee_id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
+             PreparedStatement checkStatement1 = connection.prepareStatement(CHECK_QUERY1);
+             PreparedStatement checkStatement2 = connection.prepareStatement(CHECK_QUERY2);
+             PreparedStatement deleteStatement = connection.prepareStatement(DELETE_QUERY))
+        {
+            while (true)
+            {
+                displayAllEmployees();
+
+                System.out.print("\nEnter the ID of the employee you want to delete: ");
+                String employeeIDStr = scanner.nextLine();
+                InputValidation inputValidation = new InputValidation();
+
+                if (inputValidation.integerValidation(employeeIDStr))
+                {
+                    int employeeID = Integer.parseInt(employeeIDStr);
+
+                    checkStatement1.setInt(1, employeeID);
+                    try (ResultSet checkResultSet = checkStatement1.executeQuery())
+                    {
+                        if (checkResultSet.next() && checkResultSet.getInt(1) > 0)
+                        {
+                            checkStatement2.setInt(1, employeeID);
+                            try(ResultSet checkResultSet2 = checkStatement2.executeQuery())
+                            {
+                                if(checkResultSet2.next() && checkResultSet2.getInt(1) > 0)
+                                {
+                                    System.out.println("You cannot delete a manager!");
+                                }
+                                else
+                                {
+                                    deleteStatement.setInt(1, employeeID);
+                                    int rowsAffected = deleteStatement.executeUpdate();
+                                    if (rowsAffected > 0)
+                                    {
+                                        displayAllEmployees();
+                                        System.out.println("\nEmployee with " + employeeID + " employee ID deleted successfully!");
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            System.out.println("There is no such employee ID in the system!");
+                        }
+                    }
+                }
+            }
+
+        }
+        catch (SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+/**
+ * This method serves as a placeholder for running sorting algorithms.
+* It currently prints a message indicating the execution of sorting algorithms.
+* The method clears the terminal screen
+* Prepares the system for implementing various sorting algorithms, such as Radix Sort, Shell Sort, Heap Sort, and Insertion Sort.
+ */
     public void runSortingAlgorithms()
     {
         Main.clearTheTerminal();
@@ -541,63 +536,38 @@ public class Manager extends Employee
         System.out.println("Run Sorting Algorithms");
     }
 
-    // Manager Menu Method
+    /**
+* This method displays the administrator menu, allowing the administrator to perform various operations.
+* It provides access to features such as updating profile, viewing employees, managing roles, hiring and firing employees, and running ranking algorithms.
+* The method retrieves the administrator's details (first name, last name, and role) and displays them in the menu.
+* It goes to the relevant action based on the administrator's selection.
+* If an invalid selection is entered, the menu prompts the administrator again until a valid selection is made.
+*
+* @param employee the employee object representing the logged-in administrator.
+* @param scanner the scanner object used to read user input.
+*/
+
     public void managerMenu(Employee employee, Scanner scanner)
     {
         InputValidation inputValidation = new InputValidation();
 
-        if(getNewUser())
-        {
-            do
-            {
-                System.out.println("PASSWORD CHANGE REQUIRED");
-                System.out.println("\nNew employees should set their own secure passwords.");
-                System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit and 1 special character.");
-                System.out.println("The password must not contain spaces!.\n");
+        System.out.println("Welcome, "+ employee.getName() + " " + employee.getSurname());
+        System.out.println("Your Role:  "+ employee.getRole()+ "\n");
 
-
-                System.out.print("Enter your new password: ");
-                String newPassword = scanner.nextLine();
-
-                if(inputValidation.passwordValidation(newPassword))
-                {
-                    String UPDATE_QUERY = "UPDATE firmms.employees SET password = ?, new_user = ? WHERE employee_id = ?";
-
-                    if(database.updatePassword(UPDATE_QUERY, newPassword, getEmployeeID()))
-                    {
-                        setPassword(newPassword);
-                        System.out.println("\nDatabase is being updated...\n");
-                        Main.delay();
-                        System.out.println("\nPassword updated successfully!\n");
-                        break;
-                    }
-                    else
-                    {
-                        System.out.println("\nFailed to update password. Please try again!\n");
-                    }
-                }
-            } while(true);
-        }
+        System.out.println("From this menu you can access some Manager operations.\n");
 
         do
         {
-            System.out.println("Welcome, "+ employee.getName() + " " + employee.getSurname());
-            System.out.println("Your Role:  "+ employee.getRole()+ "\n");
-
-            System.out.println("FROM THIS MENU YOU CAN ACCESS SOME MANAGER OPERATIONS.");
-            System.out.println("How the operations work is explained in the operation menus.\n");
-
-            System.out.println("1 - Display Your Profile");
-            System.out.println("2 - Update Your Profile");
-            System.out.println("3 - Display All Employees");
-            System.out.println("4 - Update Employee");
-            System.out.println("5 - Display All Roles");
-            System.out.println("6 - Add a new Role");
-            System.out.println("7 - Delete a Role");
-            System.out.println("8 - Hire Employee");
-            System.out.println("9 - Fire Employee");
-            System.out.println("10 - Algorithms");
-            System.out.println("11 - Logout");
+            System.out.println("1 - Update Your Profile");
+            System.out.println("2 - Display All Employees");
+            System.out.println("3 - Update Employee Non-Profile Fields");
+            System.out.println("4 - Display All Roles");
+            System.out.println("5 - Add a new Role");
+            System.out.println("6 - Delete a Role");
+            System.out.println("7 - Hire Employee");
+            System.out.println("8 - Fire Employee");
+            System.out.println("9 - Algorithms");
+            System.out.println("10 - Logout");
 
             System.out.print("\nEnter your choice: ");
             String managerMenuChoice = scanner.nextLine();
@@ -608,32 +578,16 @@ public class Manager extends Employee
 
                 switch (choice) {
                     case 1:
-                        Main.clearTheTerminal();
-                        System.out.println("\nYOUR PROFILE\n");
-                        database.displayProfileFromDatabase(getEmployeeID(), getEmployeeID());
+                        updateProfile();
                         if(!Main.returnMainMenu(scanner))
                         {
                             break;
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
                     case 2:
-                        Main.clearTheTerminal();
-                        updateProfile(scanner);
-                        if(!Main.returnMainMenu(scanner))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            Main.clearTheTerminal();
-                            continue;
-                        }
-                    case 3:
-                        Main.clearTheTerminal();
                         displayAllEmployees();
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -641,23 +595,19 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 4:
-                        Main.clearTheTerminal();
-                        updateEmployeeProfile(scanner);
+                    case 3:
+                        updateEmployeeProfile();
                         if(!Main.returnMainMenu(scanner))
                         {
                             break;
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 5:
-                        Main.clearTheTerminal();
+                    case 4:
                         displayAllRoles();
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -665,11 +615,9 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 6:
-                        Main.clearTheTerminal();
+                    case 5:
                         addNewRole(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -677,11 +625,9 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 7:
-                        Main.clearTheTerminal();
+                    case 6:
                         deleteRole(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -689,11 +635,9 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 8:
-                        Main.clearTheTerminal();
+                    case 7:
                         hireEmployee(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -701,11 +645,9 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 9:
-                        Main.clearTheTerminal();
+                    case 8:
                         fireEmployee(scanner);
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -713,11 +655,9 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 10:
-                        Main.clearTheTerminal();
+                    case 9:
                         runSortingAlgorithms();
                         if(!Main.returnMainMenu(scanner))
                         {
@@ -725,16 +665,16 @@ public class Manager extends Employee
                         }
                         else
                         {
-                            Main.clearTheTerminal();
                             continue;
                         }
-                    case 11:
+                    case 10:
                         System.out.println("\nLogged out.\n");
                         break;
                     default:
                         System.out.println("\nInvalid choice!\n");
                         continue;
                 }
+
                 break;
             }
         } while (true);
