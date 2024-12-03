@@ -5,14 +5,41 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+/**
+ * Created to represent a regular employee in the system.
+ * This class extends the Employee class and provides additional functionality specific to regular employees.
+ */
 public class RegularEmployee extends Employee
 {
+    private static Database database;
+    /**
+     * Creates a new RegularEmployee object with the given details.
+     * Initializes the associated database connection for the employee.
+     *
+     * @param employeeID unique ID of the employee
+     * @param username employee's username
+     * @param password employee's password
+     * @param role employee's role in the company
+     * @param name employee name
+     * @param surname last name of the employee
+     * @param phoneNo employee's phone number
+     * @param email employee's email address
+     * @param dateOfBirth employee's date of birth
+     * @param dateOfStart employee start date
+     * @param newUser indicates whether the employee is a new user (true/false)
+     */
     public RegularEmployee(int employeeID, String username, String password, String role, String name, String surname, String phoneNo, String email, Date dateOfBirth, Date dateOfStart, Boolean newUser)
     {
         super(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
+        database = new Database(employeeID, username, password, role, name, surname, phoneNo, email, dateOfBirth, dateOfStart, newUser);
     }
-
+    /**
+     * A method that allows a regular employee to update profile information.
+     * Displays the current profile and prompts the user to select the field they want to update.
+     * Performs validation of all inputs.
+     *
+     * @param scanner gives the Scanner object used for user input.
+     */
     @Override
     public void updateProfile(Scanner scanner)
     {
@@ -22,7 +49,7 @@ public class RegularEmployee extends Employee
         do
         {
             System.out.println("Your Profile");
-            displayProfileFromDatabase(presentEmployeeID);
+            database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
             System.out.print("Which profile element do you want to update: ");
             String choiceStr = scanner.nextLine();
 
@@ -43,14 +70,16 @@ public class RegularEmployee extends Employee
                 {
                     break;
                 }
-                else
-                {
-                    updateEmployeeInfoFromChoice(choice, presentEmployeeID ,scanner);
-                }
             }
         } while(true);
     }
-
+    /**
+     * Method that displays the menu and performs menu operations for normal employees.
+     * Includes options to view/update the profile and logout.
+     *
+     * @param employee returns the current employee object
+     * @param scanner gives the Scanner object used for user input.
+     */
     public void regularEmployeeMenu(Employee employee, Scanner scanner)
     {
         InputValidation inputValidation = new InputValidation();
@@ -59,104 +88,86 @@ public class RegularEmployee extends Employee
         System.out.println("Welcome, "+ employee.getName() + " " + employee.getSurname());
         System.out.println("Your Role:  "+ employee.getRole());
 
+        if(getNewUser())
+        {
+            do
+            {
+                System.out.println("PASSWORD CHANGE REQUIRED");
+                System.out.println("\nNew employees should set their own secure passwords.");
+                System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.\n");
+
+                System.out.print("Enter your new password: ");
+                String newPassword = scanner.nextLine();
+
+                if(inputValidation.passwordValidation(newPassword))
+                {
+                    String UPDATE_QUERY = "UPDATE firmms.employees SET password = ?, new_user = ? WHERE employee_id = ?";
+
+                    if(database.updatePassword(UPDATE_QUERY, newPassword, getEmployeeID()))
+                    {
+                        setPassword(newPassword);
+                        System.out.println("\nPassword updated successfully!\n");
+                        break;
+                    }
+                    else
+                    {
+                        System.out.println("\nFailed to update password. Please try again!\n");
+                    }
+                }
+            } while(true);
+        }
+
         do
         {
-            if(getNewUser())
+            System.out.println("From this menu you can access some operations.\n");
+
+            System.out.println("1 - Display Your Profile");
+            System.out.println("2 - Update Your Profile");
+            System.out.println("3 - Logout");
+
+            System.out.print("Enter your choice: ");
+            String regularEmployeeMenuChoice = scanner.nextLine();
+
+            if(inputValidation.integerValidation(regularEmployeeMenuChoice))
             {
-                do {
-                    System.out.println("PASSWORD CHANGE REQUIRED");
-                    System.out.println("\nNew employees should set their own secure passwords.");
-                    System.out.println("The password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character.\n");
+                int choice = Integer.parseInt(regularEmployeeMenuChoice);
+                int presentEmployeeID = getEmployeeID();
 
-                    System.out.print("Enter your new password: ");
-                    String newPassword = scanner.nextLine();
-
-                    if(inputValidation.passwordValidation(newPassword))
-                    {
-                        final String DATABASE_URL = "jdbc:mysql://localhost:3306/firmms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-                        final String UPDATE_QUERY = "UPDATE firmms.employees SET password = ?, new_user = ? WHERE employee_id = ?";
-
-                        try (Connection connection = DriverManager.getConnection(DATABASE_URL, "root", "12345");
-                             PreparedStatement updateStatement = connection.prepareStatement(UPDATE_QUERY))
+                switch (choice)
+                {
+                    case 1:
+                        Main.clearTheTerminal();
+                        database.displayProfileFromDatabase(presentEmployeeID, getEmployeeID());
+                        if (!Main.returnMainMenu(scanner))
                         {
-                            updateStatement.setString(1, newPassword);
-                            updateStatement.setBoolean(2, false);
-                            updateStatement.setInt(3, getEmployeeID());
-
-                            int rowsUpdated = updateStatement.executeUpdate();
-
-                            if(rowsUpdated > 0)
-                            {
-                                System.out.println("\nPassword updated successfully!\n");
-                                break;
-                            }
-                            else
-                            {
-                                System.out.println("\nFailed to update password. Please try again!\n");
-                            }
+                            break;
                         }
-                        catch (SQLException e)
+                        else
                         {
-                            e.printStackTrace();
+                            Main.clearTheTerminal();
+                            continue;
                         }
-                    }
-                } while(true);
-
+                    case 2:
+                        Main.clearTheTerminal();
+                        updateProfile(scanner);
+                        if (!Main.returnMainMenu(scanner))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            Main.clearTheTerminal();
+                            continue;
+                        }
+                    case 3:
+                        System.out.println("\nLogged out!");
+                        break;
+                    default:
+                        System.out.println("\nInvalid input!\n");
+                        continue;
+                }
                 break;
             }
-
-            else
-            {
-                System.out.println("From this menu you can access some operations.\n");
-
-                System.out.println("1 - Display Your Profile");
-                System.out.println("2 - Update Your Profile");
-                System.out.println("3 - Logout");
-
-                System.out.print("Enter your choice: ");
-                String regularEmployeeMenuChoice = scanner.nextLine();
-
-                if(inputValidation.integerValidation(regularEmployeeMenuChoice))
-                {
-                    int choice = Integer.parseInt(regularEmployeeMenuChoice);
-                    int presentEmployeeID = employee.getEmployeeID();
-
-                    switch(choice){
-                        case 1:
-                            Main.clearTheTerminal();
-                            displayProfileFromDatabase(presentEmployeeID);
-                            if(!Main.returnMainMenu(scanner))
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                Main.clearTheTerminal();
-                                break;
-                            }
-                        case 2:
-                            Main.clearTheTerminal();
-                            updateProfile(scanner);
-                            if(!Main.returnMainMenu(scanner))
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                Main.clearTheTerminal();
-                                break;
-                            }
-                        case 3:
-                            System.out.println("Logged out!\n");
-                            break;
-                        default:
-                            System.out.println("\nInvalid input!\n");
-                    }
-
-                    break;
-                }
-            }
-        } while(true);
-
+        } while (true);
     }
 }
